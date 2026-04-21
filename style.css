@@ -477,6 +477,55 @@ summary {
 .gradient-4 { background: var(--gradient-4); }
 .solid-dark { background: #111; }
 
+/* Responsiveness & Mobile Support */
+@media (max-width: 1024px) {
+    body {
+        overflow: auto;
+        height: auto;
+    }
+    
+    .app-container {
+        flex-direction: column;
+        height: auto;
+        overflow: visible;
+    }
+    
+    .controls {
+        width: 100%;
+        order: 2;
+        border-right: none;
+        border-top: 1px solid var(--glass-border);
+        padding: 24px 20px;
+        box-shadow: 0 -20px 50px rgba(0,0,0,0.4);
+    }
+    
+    .preview-area {
+        order: 1;
+        padding: 40px 15px;
+        min-height: 500px;
+        background-attachment: scroll;
+    }
+}
+
+@media (max-width: 600px) {
+    .controls {
+        padding: 24px 16px;
+        gap: 24px;
+    }
+    
+    header .logo {
+        font-size: 1.5rem;
+    }
+    
+    .format-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+    
+    .control-group {
+        padding: 16px;
+    }
+}
+
 ::-webkit-scrollbar {
     width: 8px;
 }
