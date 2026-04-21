@@ -16,25 +16,6 @@ HEADERS = {
 def index():
     return send_from_directory('.', 'index.html')
 
-@app.route('/logos/<path:filename>')
-def serve_logos(filename):
-    logos_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'logos')
-    return send_from_directory(logos_dir, filename)
-
-@app.route('/api/list-logos')
-def list_logos():
-    try:
-        logos_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'logos')
-        if not os.path.exists(logos_dir):
-            os.makedirs(logos_dir, exist_ok=True)
-            return jsonify([])
-        files = [f for f in os.listdir(logos_dir) if f.lower().endswith(('.png', '.jpg', '.jpeg', '.svg', '.webp'))]
-        print(f"DEBUG: {len(files)} logos trouvés dans {logos_dir}")
-        return jsonify(files)
-    except Exception as e:
-        print(f"Error listing logos: {e}")
-        return jsonify([])
-
 @app.route('/api/fetch-tweet')
 def fetch_tweet():
     tweet_url = request.args.get('url')
