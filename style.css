@@ -98,7 +98,7 @@ input[type="text"], textarea { background: #000; border: 1px solid var(--glass-b
 .tweet-media-wrapper { position: relative; margin-top: 10px; line-height: 0; }
 .tweet-media { border-radius: 12px; overflow: hidden; display: none; }
 .tweet-media.active { display: block; }
-.tweet-media img { width: 100%; display: block; object-fit: contain; }
+.tweet-media img { max-width: 100%; height: auto; display: block; margin: 0 auto; border-radius: inherit; }
 
 .media-watermark {
     position: absolute;

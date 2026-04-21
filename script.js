@@ -84,8 +84,18 @@ document.addEventListener('DOMContentLoaded', () => {
             const hasReply = ui.replyContainer.style.display !== 'none';
             ui.mainCard.style.gridTemplateRows = hasReply ? `${splitPos}% auto 1fr` : `1fr 0 0`;
         }
-        if (preview.media1) { const img1 = preview.media1.querySelector('img'); if (img1) img1.style.maxHeight = `${ui.inputMediaZoom1.value}px`; }
-        if (preview.media2) { const img2 = preview.media2.querySelector('img'); if (img2) img2.style.maxHeight = `${ui.inputMediaZoom2.value}px`; }
+        if (preview.media1) { 
+            const h1 = `${ui.inputMediaZoom1.value}px`;
+            preview.media1.style.maxHeight = h1;
+            const img1 = preview.media1.querySelector('img'); 
+            if (img1) img1.style.maxHeight = h1; 
+        }
+        if (preview.media2) { 
+            const h2 = `${ui.inputMediaZoom2.value}px`;
+            preview.media2.style.maxHeight = h2;
+            const img2 = preview.media2.querySelector('img'); 
+            if (img2) img2.style.maxHeight = h2; 
+        }
 
         const showC1 = ui.checkLogo1.checked && selectedLogoSrc !== "";
         const showC2 = ui.checkLogo2.checked && selectedLogoSrc !== "";
@@ -193,47 +203,53 @@ document.addEventListener('DOMContentLoaded', () => {
         btn.disabled = true;
 
         const container = ui.captureContainer;
-        const oTrans = container.style.transform;
         
-        // Reset transform pour la capture
-        container.style.transform = 'none';
+        console.log("Démarrage de l'export avec correction de décalage...");
 
-        console.log("Démarrage de l'export...");
-
-        html2canvas(container, {
+        // On définit des options strictes pour éviter les décalages
+        const options = {
             useCORS: true,
             allowTaint: false,
             backgroundColor: null,
             scale: 2,
             width: 800,
             height: 1000,
-            logging: true, // Activer pour le debug
+            x: 0,
+            y: 0,
+            scrollX: -window.scrollX, // Compense le scroll de la page
+            scrollY: -window.scrollY,
+            logging: false,
             onclone: (clonedDoc) => {
                 const el = clonedDoc.getElementById('capture-container');
                 if (el) {
+                    // Force la réinitialisation complète dans le clone
                     el.style.transform = 'none';
                     el.style.borderRadius = '0';
                     el.style.boxShadow = 'none';
+                    el.style.margin = '0';
+                    el.style.position = 'relative';
+                    el.style.top = '0';
+                    el.style.left = '0';
                 }
             }
-        })
+        };
+
+        html2canvas(container, options)
         .then(canvas => {
             console.log("Canvas généré avec succès");
             const dataUrl = canvas.toDataURL('image/png');
             const link = document.createElement('a'); 
             link.download = `x-post-studio-${Date.now()}.png`;
             link.href = dataUrl;
-            document.body.appendChild(link); // Requis pour certains navigateurs
+            document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
 
-            container.style.transform = oTrans;
             btn.innerText = 'Exporter l\'image (PNG)';
             btn.disabled = false;
         })
         .catch(err => {
             console.error("Erreur d'exportation critique:", err);
-            container.style.transform = oTrans;
             btn.innerText = '⚠️ Erreur Export';
             btn.disabled = false;
             setTimeout(() => { btn.innerText = 'Exporter l\'image (PNG)'; }, 3000);
