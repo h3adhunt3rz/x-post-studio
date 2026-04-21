@@ -1,288 +1,245 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // UI Elements
-    const btnFetch = document.getElementById('btn-fetch');
-    const btnExport = document.getElementById('btn-export');
-    const urlMain = document.getElementById('url-main');
-    const urlReply = document.getElementById('url-reply');
-    const captureContainer = document.getElementById('capture-container');
-    const frameEl = document.getElementById('frame-el');
-    const inputPadding = document.getElementById('input-padding');
-    const bgPresets = document.querySelectorAll('.bg-preset');
-    const formatBtns = document.querySelectorAll('.format-btn');
-    const watermarkEl = document.getElementById('watermark-logo');
-    const logoSelector = document.getElementById('logo-selector');
+    const ui = {
+        btnFetch: document.getElementById('btn-fetch'),
+        btnExport: document.getElementById('btn-export'),
+        urlMain: document.getElementById('url-main'),
+        urlReply: document.getElementById('url-reply'),
+        captureContainer: document.getElementById('capture-container'),
+        bgOverlay: document.getElementById('bg-overlay'),
+        mainCard: document.getElementById('main-card'),
+        inputBgColor: document.getElementById('input-bg-color'),
+        inputTextColor: document.getElementById('input-text-color'),
+        inputBgOpacity: document.getElementById('input-bg-opacity'),
+        inputBgShadow: document.getElementById('input-bg-shadow'),
+        inputTextZoom1: document.getElementById('input-text-zoom-1'),
+        inputTextZoom2: document.getElementById('input-text-zoom-2'),
+        inputAvatarZoom: document.getElementById('input-avatar-zoom'),
+        inputMediaZoom1: document.getElementById('input-media-zoom-1'),
+        inputMediaZoom2: document.getElementById('input-media-zoom-2'),
+        inputLineHeight: document.getElementById('input-line-height'),
+        inputSplitPos: document.getElementById('input-split-pos'),
+        horizontalDivider: document.getElementById('horizontal-divider'),
+        inputLogoZoom1: document.getElementById('input-logo-zoom-1'),
+        inputLogoZoom2: document.getElementById('input-logo-zoom-2'),
+        inputLogoTrademarkZoom: document.getElementById('input-logo-trademark-zoom'),
+        inputLogoTrademarkOpacity: document.getElementById('input-logo-trademark-opacity'),
+        inputLogoOpacity: document.getElementById('input-logo-opacity'),
+        inputCustomLogo: document.getElementById('input-custom-logo'),
+        checkLogo1: document.getElementById('check-logo-1'),
+        checkLogo2: document.getElementById('check-logo-2'),
+        checkTrademark: document.getElementById('check-logo-trademark'),
+        watermarkTrademark: document.getElementById('watermark-trademark'),
+        replyContainer: document.getElementById('reply-container')
+    };
 
-    // Manual inputs mapping
     const mInputs = {
-        name1: document.getElementById('m-name-1'),
-        handle1: document.getElementById('m-handle-1'),
-        text1: document.getElementById('m-text-1'),
-        name2: document.getElementById('m-name-2'),
-        handle2: document.getElementById('m-handle-2'),
-        text2: document.getElementById('m-text-2'),
-        img1: document.getElementById('m-img-1'),
-        img2: document.getElementById('m-img-2'),
+        name1: document.getElementById('m-name-1'), handle1: document.getElementById('m-handle-1'), text1: document.getElementById('m-text-1'), img1: document.getElementById('m-img-1'),
+        name2: document.getElementById('m-name-2'), handle2: document.getElementById('m-handle-2'), text2: document.getElementById('m-text-2'), img2: document.getElementById('m-img-2')
     };
 
-    // Preview elements mapping
     const preview = {
-        name1: document.getElementById('name-1'),
-        handle1: document.getElementById('handle-1'),
-        content1: document.getElementById('content-1'),
-        avatar1: document.getElementById('avatar-1'),
-        media1: document.getElementById('media-1'),
-        name2: document.getElementById('name-2'),
-        handle2: document.getElementById('handle-2'),
-        content2: document.getElementById('content-2'),
-        avatar2: document.getElementById('avatar-2'),
-        media2: document.getElementById('media-2'),
+        name1: document.getElementById('name-1'), handle1: document.getElementById('handle-1'), content1: document.getElementById('content-1'), avatar1: document.getElementById('avatar-1'), 
+        media1: document.getElementById('tweet-media-1'), watermark1: document.getElementById('media-watermark-1'),
+        name2: document.getElementById('name-2'), handle2: document.getElementById('handle-2'), content2: document.getElementById('content-2'), avatar2: document.getElementById('avatar-2'),
+        media2: document.getElementById('tweet-media-2'), watermark2: document.getElementById('media-watermark-2')
     };
 
-    let isFetching = false;
+    let selectedLogoSrc = "";
 
-    // Background Selection
-    bgPresets.forEach(preset => {
-        preset.addEventListener('click', () => {
-            bgPresets.forEach(p => p.classList.remove('active'));
-            preset.classList.add('active');
-            const bgClass = preset.dataset.bg;
-            captureContainer.classList.remove('gradient-1', 'gradient-2', 'gradient-3', 'gradient-4', 'solid-dark');
-            captureContainer.classList.add(bgClass);
-        });
-    });
-
-    // Helper: Add logo to UI
-    function addLogoItem(logo) {
-        const div = document.createElement('div');
-        div.className = 'logo-item';
-        div.dataset.src = `/logos/${logo}`;
-        div.innerHTML = `<img src="/logos/${logo}" alt="logo" crossorigin="anonymous">`;
-        
-        div.addEventListener('click', () => {
-            document.querySelectorAll('.logo-item').forEach(l => l.classList.remove('active'));
-            div.classList.add('active');
-            watermarkEl.src = getProxiedUrl(`/logos/${logo}`);
-            watermarkEl.classList.add('active');
-            watermarkEl.style.display = 'block';
-        });
-        logoSelector.appendChild(div);
+    function hexToRgba(hex, opacity) {
+        let r=0, g=0, b=0;
+        if (hex.length == 4) { r = parseInt(hex[1]+hex[1], 16); g = parseInt(hex[2]+hex[2], 16); b = parseInt(hex[3]+hex[3], 16); }
+        else { r = parseInt(hex.substring(1,3), 16); g = parseInt(hex.substring(3,5), 16); b = parseInt(hex.substring(5,7), 16); }
+        return `rgba(${r},${g},${b},${opacity})`;
     }
-
-    // Initialize Logos
-    async function initLogos() {
-        const logoList = ['digifoot_logo.png','digigoal_logo.png','digikits_logo.png','digilegends_logo.png','digiliink_logo.png'];
-        try {
-            const resp = await fetch('/api/list-logos');
-            if (resp.ok) {
-                const dynamicLogos = await resp.json();
-                if (dynamicLogos.length > 0) {
-                    logoSelector.innerHTML = '<div class="logo-item active" data-src="">None</div>';
-                    dynamicLogos.forEach(addLogoItem);
-                } else {
-                    logoList.forEach(addLogoItem);
-                }
-            } else {
-                logoList.forEach(addLogoItem);
-            }
-        } catch (e) {
-            logoList.forEach(addLogoItem);
-        }
-
-        const noneItem = logoSelector.querySelector('.logo-item[data-src=""]');
-        if (noneItem) {
-            noneItem.addEventListener('click', () => {
-                document.querySelectorAll('.logo-item').forEach(l => l.classList.remove('active'));
-                noneItem.classList.add('active');
-                watermarkEl.src = '';
-                watermarkEl.classList.remove('active');
-                watermarkEl.style.display = 'none';
-            });
-        }
-    }
-    initLogos();
-
-    // Scaling Logic
-    function updateLayout() {
-        if (!frameEl || !captureContainer) return;
-        const activeBtn = document.querySelector('.format-btn.active');
-        const ratioData = activeBtn ? activeBtn.dataset.ratio : 'auto';
-        
-        const dims = {
-            'auto': { w: 600, h: 'auto' },
-            '1-1':  { w: 800, h: 800 },
-            '4-5':  { w: 800, h: 1000 },
-            '9-16': { w: 700, h: 1244 },
-            '4-3':  { w: 1000, h: 750 }
-        };
-
-        const target = dims[ratioData] || dims['auto'];
-        
-        // 1. Set real size
-        captureContainer.style.width = target.w + 'px';
-        captureContainer.style.height = target.h === 'auto' ? 'auto' : (target.h + 'px');
-
-        // 2. Visual Scale for Preview
-        const previewArea = document.querySelector('.preview-area');
-        if (previewArea) {
-            const availW = previewArea.clientWidth - 40;
-            const availH = previewArea.clientHeight - 40;
-            let vScale = 1;
-
-            if (target.w > availW) vScale = availW / target.w;
-            const currentH = captureContainer.offsetHeight;
-            if ((currentH * vScale) > availH) vScale = availH / currentH;
-
-            captureContainer.style.transform = `scale(${vScale})`;
-            captureContainer.style.transformOrigin = 'center center';
-        }
-
-        // 3. Frame scaling (internal)
-        frameEl.style.transform = 'translate(-50%, -50%) scale(1)';
-        frameEl.style.width = '850px'; 
-
-        if (ratioData === 'auto') return;
-
-        const margin = 80;
-        const availableW = captureContainer.clientWidth - margin;
-        const availableH = captureContainer.clientHeight - margin;
-        
-        let frameW = frameEl.offsetWidth;
-        let frameH = frameEl.offsetHeight;
-        let scaleW = availableW / frameW;
-        let scaleH = availableH / frameH;
-        
-        if (scaleH < scaleW) {
-            const optimalWidth = Math.min(availableW / scaleH, 1200); 
-            frameEl.style.width = `${optimalWidth}px`;
-            frameH = frameEl.offsetHeight;
-            const finalScale = availableH / frameH;
-            frameEl.style.transform = `translate(-50%, -50%) scale(${finalScale})`;
-        } else {
-            frameEl.style.transform = `translate(-50%, -50%) scale(${scaleW})`;
-        }
-    }
-
-    // Format selection
-    formatBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
-            formatBtns.forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            const ratio = btn.dataset.ratio;
-            captureContainer.classList.remove('ratio-auto', 'ratio-1-1', 'ratio-4-5', 'ratio-9-16', 'ratio-4-3');
-            captureContainer.classList.add(`ratio-${ratio}`);
-            setTimeout(updateLayout, 100);
-        });
-    });
-
-    const resizeObserver = new ResizeObserver(() => updateLayout());
-    resizeObserver.observe(frameEl);
-
-    inputPadding.addEventListener('input', (e) => {
-        captureContainer.style.padding = `${e.target.value}px`;
-    });
 
     const getProxiedUrl = (url) => {
-        if (!url || url.startsWith('data:') || url.startsWith('blob:') || url.startsWith('/')) return url;
-        if (!url.startsWith('http')) return url;
+        if (!url) return "";
+        if (url.startsWith('data:')) return url;
+        // All external assets go through the local proxy
         return `/api/proxy?url=${encodeURIComponent(url)}`;
     };
 
-    const syncManualToPreview = () => {
-        preview.name1.textContent = mInputs.name1.value || 'Antigravity';
-        preview.handle1.textContent = mInputs.handle1.value || '@antigravity_ai';
-        preview.content1.innerHTML = mInputs.text1.value.replace(/\n/g, '<br>') || 'Texte...';
-        
-        const avatarUrl1 = mInputs.name1.dataset.avatar || `https://unavatar.io/twitter/${mInputs.handle1.value.replace('@','')}`;
-        preview.avatar1.style.backgroundImage = `url('${getProxiedUrl(avatarUrl1)}')`;
-
-        if (mInputs.img1.value) {
-            preview.media1.innerHTML = `<img src="${getProxiedUrl(mInputs.img1.value)}" alt="media" crossorigin="anonymous">`;
-            preview.media1.classList.add('active');
-        } else {
-            preview.media1.classList.remove('active');
+    const refreshUI = () => {
+        if(ui.captureContainer) {
+            const bgOpac = ui.inputBgOpacity.value / 100;
+            ui.captureContainer.style.background = hexToRgba(ui.inputBgColor.value, bgOpac);
+            ui.captureContainer.style.color = ui.inputTextColor.value;
         }
-
-        preview.name2.textContent = mInputs.name2.value || 'User';
-        preview.handle2.textContent = mInputs.handle2.value || '@reply';
-        preview.content2.innerHTML = mInputs.text2.value.replace(/\n/g, '<br>') || 'Reponse...';
-        
-        const avatarUrl2 = mInputs.name2.dataset.avatar || `https://unavatar.io/twitter/${mInputs.handle2.value.replace('@','')}`;
-        preview.avatar2.style.backgroundImage = `url('${getProxiedUrl(avatarUrl2)}')`;
-
-        if (mInputs.img2.value) {
-            preview.media2.innerHTML = `<img src="${getProxiedUrl(mInputs.img2.value)}" alt="media" crossorigin="anonymous">`;
-            preview.media2.classList.add('active');
-        } else {
-            preview.media2.classList.remove('active');
+        if(ui.bgOverlay) {
+            const sh = ui.inputBgShadow.value / 100;
+            ui.bgOverlay.style.background = `radial-gradient(circle, transparent 30%, rgba(0,0,0,${sh}) 100%)`;
         }
+        const lineH = ui.inputLineHeight.value / 100;
+        const splitPos = ui.inputSplitPos.value;
+        const logoOpac = ui.inputLogoOpacity.value / 100;
 
-        setTimeout(updateLayout, 50);
+        if(preview.content1) { preview.content1.style.fontSize = `${ui.inputTextZoom1.value}px`; preview.content1.style.lineHeight = `${lineH}`; }
+        if(preview.content2) { preview.content2.style.fontSize = `${ui.inputTextZoom2.value}px`; preview.content2.style.lineHeight = `${lineH}`; }
+
+        const avSize = ui.inputAvatarZoom.value;
+        [preview.avatar1, preview.avatar2].forEach(a => { if(a) { a.style.width = `${avSize}px`; a.style.height = `${avSize}px`; } });
+        
+        if(ui.mainCard) {
+            const hasReply = ui.replyContainer.style.display !== 'none';
+            ui.mainCard.style.gridTemplateRows = hasReply ? `${splitPos}% auto 1fr` : `1fr 0 0`;
+        }
+        if (preview.media1) { const img1 = preview.media1.querySelector('img'); if (img1) img1.style.maxHeight = `${ui.inputMediaZoom1.value}px`; }
+        if (preview.media2) { const img2 = preview.media2.querySelector('img'); if (img2) img2.style.maxHeight = `${ui.inputMediaZoom2.value}px`; }
+
+        const showC1 = ui.checkLogo1.checked && selectedLogoSrc !== "";
+        const showC2 = ui.checkLogo2.checked && selectedLogoSrc !== "";
+        const showTM = ui.checkTrademark.checked && selectedLogoSrc !== "";
+
+        if(preview.watermark1) {
+            preview.watermark1.src = selectedLogoSrc;
+            preview.watermark1.style.width = `${ui.inputLogoZoom1.value}%`;
+            preview.watermark1.style.opacity = logoOpac;
+            preview.watermark1.style.display = (showC1 && mInputs.img1.value) ? 'block' : 'none';
+        }
+        if(preview.watermark2) {
+            preview.watermark2.src = selectedLogoSrc;
+            preview.watermark2.style.width = `${ui.inputLogoZoom2.value}%`;
+            preview.watermark2.style.opacity = logoOpac;
+            preview.watermark2.style.display = (showC2 && mInputs.img2.value) ? 'block' : 'none';
+        }
+        if(ui.watermarkTrademark) {
+            ui.watermarkTrademark.src = selectedLogoSrc;
+            ui.watermarkTrademark.style.opacity = ui.inputLogoTrademarkOpacity.value / 100;
+            ui.watermarkTrademark.style.width = `${ui.inputLogoTrademarkZoom.value}%`;
+            ui.watermarkTrademark.style.display = showTM ? 'block' : 'none';
+        }
+        updateLayout();
     };
 
-    [...Object.values(mInputs)].forEach(input => input.addEventListener('input', syncManualToPreview));
+    const ctrls = [
+        ui.inputBgColor, ui.inputTextColor, ui.inputBgOpacity, ui.inputBgShadow,
+        ui.inputTextZoom1, ui.inputTextZoom2, ui.inputAvatarZoom, 
+        ui.inputMediaZoom1, ui.inputMediaZoom2, ui.inputLineHeight, ui.inputSplitPos, 
+        ui.inputLogoZoom1, ui.inputLogoZoom2, ui.inputLogoTrademarkZoom, ui.inputLogoTrademarkOpacity, ui.inputLogoOpacity, 
+        ui.checkLogo1, ui.checkLogo2, ui.checkTrademark
+    ];
+    ctrls.forEach(c => { if(c) c.oninput = refreshUI; });
 
-    // Fetch Logic
-    btnFetch.addEventListener('click', async () => {
-        if (isFetching) return;
-        const urls = [urlMain.value, urlReply.value].filter(u => u.trim() !== '');
-        if (urls.length === 0) return alert('Lien requis.');
+    ui.inputCustomLogo.onchange = (e) => {
+        const file = e.target.files[0];
+        if(!file) return;
+        const reader = new FileReader();
+        reader.onload = (rev) => {
+            selectedLogoSrc = rev.target.result;
+            refreshUI();
+        };
+        reader.readAsDataURL(file);
+    };
 
-        isFetching = true;
-        btnFetch.innerHTML = 'Chargement...';
-        try {
-            if (urlMain.value) {
-                const resp = await fetch(`/api/fetch-tweet?url=${encodeURIComponent(urlMain.value)}`);
-                const data = await resp.json();
-                if (data.success) {
-                    mInputs.name1.value = data.author_name;
-                    mInputs.handle1.value = '@' + data.author_handle;
-                    mInputs.text1.value = data.content;
-                    mInputs.name1.dataset.avatar = data.avatar_url;
-                    if (data.media_url) mInputs.img1.value = data.media_url;
+    function updateLayout() {
+        const pArea = document.querySelector('.preview-area');
+        if(!pArea || !ui.captureContainer) return;
+        const vScale = Math.min((pArea.clientWidth - 20) / 800, (pArea.clientHeight - 20) / (ui.captureContainer.offsetHeight || 1000), 1);
+        ui.captureContainer.style.transformOrigin = 'center center';
+        ui.captureContainer.style.transform = `scale(${vScale})`;
+    }
+
+    const sync = () => {
+        const hasReply = (mInputs.text2.value && mInputs.text2.value.trim() !== "") || (mInputs.name2.value && mInputs.name2.value.trim() !== "");
+        ui.replyContainer.style.display = hasReply ? 'block' : 'none';
+        if(ui.horizontalDivider) ui.horizontalDivider.style.display = hasReply ? 'block' : 'none';
+
+        const uPost = (idx) => {
+            preview[`name${idx}`].textContent = mInputs[`name${idx}`].value || 'Nom';
+            preview[`handle${idx}`].textContent = mInputs[`handle${idx}`].value || '@handle';
+            let cleanText = (mInputs[`text${idx}`].value || '').replace(/\n\s*\n/g, '\n');
+            preview[`content${idx}`].innerHTML = cleanText.replace(/\n/g, '<br>');
+            const avUrl = mInputs[`name${idx}`].dataset.avatar || `https://unavatar.io/twitter/${mInputs[`handle${idx}`].value.replace('@','')}`;
+            const proxiedAv = getProxiedUrl(avUrl);
+            preview[`avatar${idx}`].innerHTML = `<img src="${proxiedAv}" crossorigin="anonymous" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">`;
+
+            if (mInputs[`img${idx}`].value) {
+                preview[`media${idx}`].innerHTML = `<img src="${getProxiedUrl(mInputs[`img${idx}`].value)}" crossorigin="anonymous">`;
+                preview[`media${idx}`].classList.add('active');
+            } else {
+                preview[`media${idx}`].classList.remove('active');
+                preview[`media${idx}`].innerHTML = '';
+            }
+        };
+        uPost(1); if (hasReply) uPost(2);
+        refreshUI();
+    };
+
+    Object.values(mInputs).forEach(i => { if(i) i.oninput = sync; });
+
+    ui.btnFetch.onclick = async () => {
+        ui.btnFetch.innerText = '⌛...';
+        const fOne = async (url, idx) => {
+            if (!url) return;
+            try {
+                const r = await fetch(`/api/fetch-tweet?url=${encodeURIComponent(url)}&t=${Date.now()}`);
+                const d = await r.json();
+                if (d.success) {
+                    mInputs[`name${idx}`].value = d.author_name; mInputs[`handle${idx}`].value = '@' + d.author_handle;
+                    mInputs[`text${idx}`].value = d.content; mInputs[`name${idx}`].dataset.avatar = d.avatar_url;
+                    mInputs[`img${idx}`].value = d.media_url || "";
+                }
+            } catch(e) {}
+        };
+        await Promise.all([fOne(ui.urlMain.value, 1), fOne(ui.urlReply.value, 2)]);
+        sync();
+        ui.btnFetch.innerText = 'Récupérer';
+    };
+
+    ui.btnExport.onclick = () => {
+        const btn = ui.btnExport;
+        btn.innerText = '📸 Génération PNG...';
+        btn.disabled = true;
+
+        const container = ui.captureContainer;
+        const oTrans = container.style.transform;
+        
+        // Reset transform pour la capture
+        container.style.transform = 'none';
+
+        console.log("Démarrage de l'export...");
+
+        html2canvas(container, {
+            useCORS: true,
+            allowTaint: false,
+            backgroundColor: null,
+            scale: 2,
+            width: 800,
+            height: 1000,
+            logging: true, // Activer pour le debug
+            onclone: (clonedDoc) => {
+                const el = clonedDoc.getElementById('capture-container');
+                if (el) {
+                    el.style.transform = 'none';
+                    el.style.borderRadius = '0';
+                    el.style.boxShadow = 'none';
                 }
             }
-            if (urlReply.value) {
-                const resp = await fetch(`/api/fetch-tweet?url=${encodeURIComponent(urlReply.value)}`);
-                const data = await resp.json();
-                if (data.success) {
-                    mInputs.name2.value = data.author_name;
-                    mInputs.handle2.value = '@' + data.author_handle;
-                    mInputs.text2.value = data.content;
-                    mInputs.name2.dataset.avatar = data.avatar_url;
-                    if (data.media_url) mInputs.img2.value = data.media_url;
-                }
-            }
-            syncManualToPreview();
-        } catch (e) { console.error(e); }
-        finally {
-             isFetching = false;
-             btnFetch.innerHTML = 'Récupérer les posts';
-        }
-    });
+        })
+        .then(canvas => {
+            console.log("Canvas généré avec succès");
+            const dataUrl = canvas.toDataURL('image/png');
+            const link = document.createElement('a'); 
+            link.download = `x-post-studio-${Date.now()}.png`;
+            link.href = dataUrl;
+            document.body.appendChild(link); // Requis pour certains navigateurs
+            link.click();
+            document.body.removeChild(link);
 
-    // Export Logic
-    btnExport.addEventListener('click', () => {
-        btnExport.innerHTML = 'Exportation...';
-        updateLayout();
-        setTimeout(() => {
-            htmlToImage.toPng(captureContainer, { quality:1, pixelRatio:2.5, cacheBust:true })
-                .then(dataUrl => {
-                    const link = document.createElement('a');
-                    link.download = `x-post-${Date.now()}.png`;
-                    link.href = dataUrl;
-                    link.click();
-                    btnExport.innerHTML = 'Exporter en Image';
-                })
-                .catch(err => {
-                    console.error(err);
-                    btnExport.innerHTML = 'Exporter en Image';
-                });
-        }, 500);
-    });
+            container.style.transform = oTrans;
+            btn.innerText = 'Exporter l\'image (PNG)';
+            btn.disabled = false;
+        })
+        .catch(err => {
+            console.error("Erreur d'exportation critique:", err);
+            container.style.transform = oTrans;
+            btn.innerText = '⚠️ Erreur Export';
+            btn.disabled = false;
+            setTimeout(() => { btn.innerText = 'Exporter l\'image (PNG)'; }, 3000);
+        });
+    };
+
+    window.onresize = updateLayout;
+    setTimeout(sync, 500);
 });
-
-if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/service-worker.js').catch(e => console.error(e));
-    });
-}

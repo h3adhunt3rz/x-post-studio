@@ -3,185 +3,196 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>X-Post Studio | Reply + Quote</title>
-    <!-- PWA -->
-    <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#0f172a">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <!-- Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" crossorigin="anonymous">
-    <!-- Style -->
+    <title>X-STUDIO | Copyright Pro</title>
     <link rel="stylesheet" href="style.css">
-    <!-- Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 <body class="dark-theme">
     <div class="app-container">
-        <!-- Sidebar / Controls -->
         <aside class="controls">
             <header>
-                <div class="logo">
-                    <i data-lucide="sparkles"></i>
-                    <span>X-Post Studio</span>
-                </div>
-                <p>Créez de superbes visuels de vos posts X</p>
+                <div class="logo"><i data-lucide="copyright"></i> <span>X-STUDIO PRO</span></div>
             </header>
 
             <section class="control-group">
-                <h3><i data-lucide="link"></i> Sources</h3>
-                <div class="input-wrapper">
-                    <label>Post Principal (X URL)</label>
-                    <input type="text" id="url-main" placeholder="https://x.com/user/status/..." autocomplete="off">
-                </div>
-                <div class="input-wrapper">
-                    <label>Réponse / Citation (X URL)</label>
-                    <input type="text" id="url-reply" placeholder="https://x.com/user/status/..." autocomplete="off">
-                </div>
-                <button id="btn-fetch" class="btn-primary">
-                    <i data-lucide="download"></i> Récupérer les posts
-                </button>
+                <h3><i data-lucide="link"></i> Sources X</h3>
+                <input type="text" id="url-main" placeholder="Lien Post Principal">
+                <input type="text" id="url-reply" placeholder="Lien Réponse (Optionnel)">
+                <button id="btn-fetch" class="btn-primary">Récupérer</button>
             </section>
 
             <section class="control-group">
-                <h3><i data-lucide="maximize"></i> Format & Dimensions</h3>
-                <div class="format-grid">
-                    <button class="format-btn active" data-ratio="auto" title="Auto">Auto</button>
-                    <button class="format-btn" data-ratio="1-1" title="Instagram / Square">
-                        <i data-lucide="square"></i> 1:1
-                    </button>
-                    <button class="format-btn" data-ratio="4-5" title="Insta Portrait">
-                        <i data-lucide="rectangle-vertical"></i> 4:5
-                    </button>
-                    <button class="format-btn" data-ratio="9-16" title="Story / Reel">
-                        <i data-lucide="smartphone"></i> 9:16
-                    </button>
-                    <button class="format-btn" data-ratio="4-3" title="X / Landscape">
-                        <i data-lucide="rectangle-horizontal"></i> 4:3
-                    </button>
-                </div>
-            </section>
-
-            <section class="control-group">
+                <h3><i data-lucide="shield-check"></i> Protection & Branding</h3>
                 <div class="control-row">
-                    <label>Background</label>
-                    <div class="bg-presets">
-                        <div class="bg-preset p1" data-bg="gradient-1"></div>
-                        <div class="bg-preset p2" data-bg="gradient-2"></div>
-                        <div class="bg-preset p3" data-bg="gradient-3"></div>
-                        <div class="bg-preset p4" data-bg="gradient-4"></div>
-                        <div class="bg-preset p5" data-bg="solid-dark"></div>
+                    <label>Logo Signature (Haut-Droite)</label>
+                    <div style="display: flex; gap: 5px;">
+                        <input type="file" id="input-custom-logo" accept="image/*" style="display: none;">
+                        <button class="btn-primary" onclick="document.getElementById('input-custom-logo').click()" style="flex:1; font-size:0.7rem;">📁 Votre Logo</button>
+                        <input type="range" id="input-logo-trademark-zoom" min="5" max="30" value="12" title="Zoom" style="flex:1">
+                        <input type="range" id="input-logo-trademark-opacity" min="0" max="100" value="100" title="Transparence" style="flex:1">
                     </div>
                 </div>
-
+                <div class="control-grid-2">
+                    <div class="control-row">
+                        <label>Zoom Centre 1</label>
+                        <input type="range" id="input-logo-zoom-1" min="5" max="60" value="25">
+                    </div>
+                    <div class="control-row">
+                        <label>Zoom Centre 2</label>
+                        <input type="range" id="input-logo-zoom-2" min="5" max="60" value="25">
+                    </div>
+                </div>
                 <div class="control-row">
-                    <label>Padding</label>
-                    <input type="range" id="input-padding" min="20" max="120" value="60">
+                    <label>Transparence Protection (Centre)</label>
+                    <input type="range" id="input-logo-opacity" min="10" max="100" value="80">
                 </div>
-                
-            <div class="control-group">
-                <h3><i data-lucide="award"></i> Logo / Branding</h3>
-                <div class="logo-grid" id="logo-selector">
-                    <div class="logo-item active" data-src="">None</div>
-                    <!-- Logos loaded dynamically here -->
+                <div class="toggle-row">
+                    <label>Protection Images (Centre)</label>
+                    <div style="display: flex; gap:8px;">
+                        <input type="checkbox" id="check-logo-1" checked title="Img 1">
+                        <input type="checkbox" id="check-logo-2" checked title="Img 2">
+                    </div>
                 </div>
-            </div>
+                <div class="toggle-row">
+                    <label>Signature (Haut-Droite)</label>
+                    <input type="checkbox" id="check-logo-trademark" checked>
+                </div>
             </section>
 
-                <section class="control-group">
-                <h3><i data-lucide="edit-3"></i> Édition Manuelle</h3>
+            <section class="control-group">
+                <h3><i data-lucide="sliders"></i> Tailles & Réglages</h3>
+                <div class="control-grid-2">
+                    <div class="control-row">
+                        <label>Texte 1</label>
+                        <input type="range" id="input-text-zoom-1" min="12" max="40" value="26">
+                    </div>
+                    <div class="control-row">
+                        <label>Texte 2</label>
+                        <input type="range" id="input-text-zoom-2" min="12" max="40" value="26">
+                    </div>
+                </div>
+                <div class="control-grid-3">
+                    <div class="control-row">
+                        <label>Avatar</label>
+                        <input type="range" id="input-avatar-zoom" min="30" max="100" value="50">
+                    </div>
+                    <div class="control-row">
+                        <label>Interligne</label>
+                        <input type="range" id="input-line-height" min="80" max="200" value="135">
+                    </div>
+                    <div class="control-row">
+                        <label>Sépârateur</label>
+                        <input type="range" id="input-split-pos" min="20" max="95" value="65">
+                    </div>
+                </div>
+                <div class="control-grid-2">
+                    <div class="control-row">
+                        <label>Média 1</label>
+                        <input type="range" id="input-media-zoom-1" min="50" max="600" value="300">
+                    </div>
+                    <div class="control-row">
+                        <label>Média 2</label>
+                        <input type="range" id="input-media-zoom-2" min="50" max="600" value="300">
+                    </div>
+                </div>
+            </section>
+            <section class="control-group">
+                <h3><i data-lucide="palette"></i> Design du Fond</h3>
+                <div class="control-grid-2">
+                    <div class="control-row">
+                        <label>Couleur Fond</label>
+                        <input type="color" id="input-bg-color" value="#000000" style="height:35px; padding:2px;">
+                    </div>
+                    <div class="control-row">
+                        <label>Couleur Texte</label>
+                        <input type="color" id="input-text-color" value="#ffffff" style="height:35px; padding:2px;">
+                    </div>
+                </div>
+                <div class="control-grid-2">
+                    <div class="control-row">
+                        <label>Opacité Fond</label>
+                        <input type="range" id="input-bg-opacity" min="0" max="100" value="100">
+                    </div>
+                    <div class="control-row">
+                        <label>Intensité Ombre</label>
+                        <input type="range" id="input-bg-shadow" min="0" max="100" value="30">
+                    </div>
+                </div>
+            </section>
+
+            <section class="control-group">
                 <details>
-                    <summary>Modifier les détails</summary>
-                    <div id="manual-inputs">
-                        <!-- Will be populated for both posts -->
-                         <div class="manual-post">
-                            <p>Post 1 (Main)</p>
-                            <input type="text" id="m-name-1" placeholder="Nom">
-                            <input type="text" id="m-handle-1" placeholder="@handle">
-                            <textarea id="m-text-1" placeholder="Texte du post"></textarea>
-                            <div class="input-wrapper">
-                                <label>Image du Post</label>
-                                <input type="text" id="m-img-1" placeholder="URL de l'image ou glisser-déposer">
-                            </div>
-                         </div>
-                         <div class="manual-post">
-                            <p>Post 2 (Reply)</p>
-                            <input type="text" id="m-name-2" placeholder="Nom">
-                            <input type="text" id="m-handle-2" placeholder="@handle">
-                            <textarea id="m-text-2" placeholder="Texte du post"></textarea>
-                            <div class="input-wrapper">
-                                <label>Image du Post</label>
-                                <input type="text" id="m-img-2" placeholder="URL de l'image ou glisser-déposer">
-                            </div>
-                         </div>
+                    <summary>Édition Manuelle</summary>
+                    <div class="manual-post">
+                        <input type="text" id="m-name-1" placeholder="Nom 1">
+                        <input type="text" id="m-handle-1" placeholder="@handle 1">
+                        <textarea id="m-text-1" placeholder="Texte 1"></textarea>
+                        <input type="text" id="m-img-1" placeholder="URL Image 1">
+                    </div>
+                    <div class="manual-post">
+                        <input type="text" id="m-name-2" placeholder="Nom 2">
+                        <input type="text" id="m-handle-2" placeholder="@handle 2">
+                        <textarea id="m-text-2" placeholder="Texte 2"></textarea>
+                        <input type="text" id="m-img-2" placeholder="URL Image 2">
                     </div>
                 </details>
             </section>
 
-            <footer class="controls-footer">
-                <button id="btn-export" class="btn-export">
-                    <i data-lucide="image"></i> Exporter en Image
-                </button>
-            </footer>
+            <button id="btn-export" class="btn-export">Exporter l'image (4:5)</button>
         </aside>
 
-        <!-- Preview Area -->
         <main class="preview-area">
-            <div id="capture-container" class="capture-container gradient-1">
-                <div class="frame-wrapper" id="frame-wrapper">
-                    <div class="frame" id="frame-el">
-                        
-                        <!-- Main Post -->
-                        <div id="post-main" class="tweet-block">
-                            <div class="tweet-header">
-                                <div class="avatar" id="avatar-1"></div>
-                                <div class="user-info">
-                                    <div class="name" id="name-1">Antigravity</div>
-                                    <div class="handle" id="handle-1">@antigravity_ai</div>
-                                </div>
-                                <div class="x-logo">
-                                    <svg viewBox="0 0 24 24" aria-hidden="true"><g><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"></path></g></svg>
-                                </div>
+            <div id="capture-container" class="capture-container format-4-5">
+                <!-- Trademark Unique -->
+                <img src="" id="watermark-trademark" class="watermark-trademark">
+                <div id="bg-overlay" class="bg-overlay"></div>
+                
+                <div id="main-card" class="post-card">
+                    
+                    <div id="post-main" class="tweet-block">
+                        <div class="tweet-header">
+                            <div class="avatar" id="avatar-1"></div>
+                            <div class="user-info">
+                                <div class="name" id="name-1">Antigravity</div>
+                                <div class="handle" id="handle-1">@antigravity_ai</div>
                             </div>
-                            <div class="tweet-content" id="content-1">
-                                Ceci est un exemple de post. Collez un lien pour le mettre à jour automatiquement ou modifiez-le manuellement dans la barre latérale.
-                            </div>
-                            <div class="tweet-media" id="media-1"></div>
                         </div>
+                        <div class="tweet-content" id="content-1">Votre contenu ici...</div>
+                        <div class="tweet-media-wrapper" id="tweet-media-wrapper-1">
+                            <div class="tweet-media" id="tweet-media-1"></div>
+                            <img src="" class="media-watermark" id="media-watermark-1">
+                        </div>
+                    </div>
 
-                        <!-- Connection Line (visual) -->
+                    <div id="horizontal-divider" class="horizontal-divider" style="display: none;"></div>
+
+                    <div id="reply-container" style="display: none;">
                         <div class="connection-line"></div>
-
-                        <!-- Reply Post -->
-                        <div id="post-reply" class="tweet-block reply-block">
+                        <div id="post-reply" class="tweet-block">
                             <div class="tweet-header">
                                 <div class="avatar" id="avatar-2"></div>
                                 <div class="user-info">
-                                    <div class="name" id="name-2">User Reply</div>
-                                    <div class="handle" id="handle-2">@reply_user</div>
+                                    <div class="name" id="name-2">User</div>
+                                    <div class="handle" id="handle-2">@reply</div>
                                 </div>
                             </div>
-                            <div class="tweet-content" id="content-2">
-                                Ceci est la réponse au post précédent. Vous pouvez ajuster le design et le contenu à votre guise !
+                            <div class="tweet-content" id="content-2">Réponse...</div>
+                            <div class="tweet-media-wrapper" id="tweet-media-wrapper-2">
+                                <div class="tweet-media" id="tweet-media-2"></div>
+                                <img src="" class="media-watermark" id="media-watermark-2">
                             </div>
-                            <div class="tweet-media" id="media-2"></div>
                         </div>
-
                     </div>
+
+                    <!-- Watermark global (si aucune image) -->
+                    <img id="watermark-logo-global" class="watermark-logo" src="" style="display: none;">
                 </div>
-                <!-- Watermark Logo -->
-                <img id="watermark-logo" class="watermark-logo" src="" alt="" style="display: none;">
             </div>
         </main>
     </div>
 
-    <!-- Scripts -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html-to-image/1.11.11/html-to-image.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="script.js"></script>
-    <script>
-        lucide.createIcons();
-    </script>
+    <script>lucide.createIcons();</script>
 </body>
 </html>
