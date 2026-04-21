@@ -59,33 +59,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const watermarkEl = document.getElementById('watermark-logo');
     const logoSelector = document.getElementById('logo-selector');
 
-    // Dynamic Logo Loading
-    async function initLogos() {
-        const logoList = [
-            'digifoot_logo.png',
-            'digigoal_logo.png',
-            'digikits_logo.png',
-            'digilegends_logo.png',
-            'digiliink_logo.png'
-        ];
-
-        const logoSelector = document.getElementById('logo-selector');
-        
-        // Helper to add a logo to the UI
-                    logoSelector.innerHTML = '<div class="logo-item active" data-src="">None</div>';
-                    dynamicLogos.forEach(addLogoItem);
-                } else {
-                    logoList.forEach(addLogoItem);
-                }
-            } else {
-                logoList.forEach(addLogoItem);
-            }
-        } catch (e) {
-            // Fallback to hardcoded list if server is down
-            logoList.forEach(addLogoItem);
-        }
-    }
-
     // Helper to add a logo to the UI
     function addLogoItem(logo) {
         const div = document.createElement('div');
@@ -101,9 +74,36 @@ document.addEventListener('DOMContentLoaded', () => {
             watermarkEl.style.display = 'block';
         });
         
-        const logoSelector = document.getElementById('logo-selector');
         logoSelector.appendChild(div);
     };
+
+    // Dynamic Logo Loading
+    async function initLogos() {
+        const logoList = [
+            'digifoot_logo.png',
+            'digigoal_logo.png',
+            'digikits_logo.png',
+            'digilegends_logo.png',
+            'digiliink_logo.png'
+        ];
+
+        try {
+            // Try to get dynamic list from server
+            const resp = await fetch('/api/list-logos');
+            if (resp.ok) {
+                const dynamicLogos = await resp.json();
+                if (dynamicLogos.length > 0) {
+                    logoSelector.innerHTML = '<div class="logo-item active" data-src="">None</div>';
+                    dynamicLogos.forEach(addLogoItem);
+                } else {
+                    logoList.forEach(addLogoItem);
+                }
+            } else {
+                logoList.forEach(addLogoItem);
+            }
+        } catch (e) {
+            logoList.forEach(addLogoItem);
+        }
 
         // Handle "None" item
         const noneItem = logoSelector.querySelector('.logo-item[data-src=""]');
@@ -156,7 +156,6 @@ document.addEventListener('DOMContentLoaded', () => {
         captureContainer.style.height = target.h === 'auto' ? 'auto' : (target.h + 'px');
 
         // VISUAL SCALING FOR MOBILE PREVIEW
-        // If container is wider than the preview area, scale it down visually
         const parentW = captureContainer.parentElement.clientWidth;
         const currentW = target.w;
         if (currentW > parentW - 20) {
@@ -194,7 +193,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Auto-update when content size changes (images loading, etc)
+    // Auto-update when content size changes
     const resizeObserver = new ResizeObserver(() => {
         updateLayout();
     });
@@ -220,7 +219,6 @@ document.addEventListener('DOMContentLoaded', () => {
         preview.content1.innerHTML = mInputs.text1.value.replace(/\n/g, '<br>') || 'Votre post ici...';
         
         const cleanH1 = h1.replace('@', '');
-        // Use manual avatar URL if provided in data or fallback to unavatar
         const avatarUrl1 = mInputs.name1.dataset.avatar || `https://unavatar.io/twitter/${cleanH1}`;
         preview.avatar1.style.backgroundImage = `url('${getProxiedUrl(avatarUrl1)}')`;
 
@@ -252,7 +250,6 @@ document.addEventListener('DOMContentLoaded', () => {
             preview.media2.innerHTML = '';
         }
 
-        // Apply scale after content update
         setTimeout(updateLayout, 50);
     };
 
@@ -263,7 +260,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // Drag & Drop for images
     const setupDragAndDrop = (inputId, postIndex) => {
         const input = document.getElementById(inputId);
-        
         ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
             input.addEventListener(eventName, (e) => {
                 e.preventDefault();
@@ -276,7 +272,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (file && file.type.startsWith('image/')) {
                 const reader = new FileReader();
                 reader.onload = (e) => {
-                    input.value = e.target.result; // Base64
+                    input.value = e.target.result;
                     syncManualToPreview();
                 };
                 reader.readAsDataURL(file);
@@ -290,7 +286,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // Fetch Logic
     btnFetch.addEventListener('click', async () => {
         if (isFetching) return;
-        
         const urls = [urlMain.value, urlReply.value].filter(u => u.trim() !== '');
         if (urls.length === 0) {
             alert('Veuillez entrer au moins un lien X.');
@@ -302,23 +297,15 @@ document.addEventListener('DOMContentLoaded', () => {
         lucide.createIcons();
 
         try {
-            // Fetch Main
             if (urlMain.value) {
                 const data = await fetchTweet(urlMain.value);
-                if (data.success) {
-                    updateInputs(1, data);
-                } else {
-                    alert('Erreur Post 1 : ' + (data.message || 'Impossible de récupérer le post.'));
-                }
+                if (data.success) updateInputs(1, data);
+                else alert('Erreur Post 1 : ' + (data.message || 'Impossible de récupérer le post.'));
             }
-            // Fetch Reply
             if (urlReply.value) {
                 const data = await fetchTweet(urlReply.value);
-                if (data.success) {
-                    updateInputs(2, data);
-                } else {
-                    alert('Erreur Post 2 : ' + (data.message || 'Impossible de récupérer le post.'));
-                }
+                if (data.success) updateInputs(2, data);
+                else alert('Erreur Post 2 : ' + (data.message || 'Impossible de récupérer le post.'));
             }
             syncManualToPreview();
         } catch (err) {
@@ -332,7 +319,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function fetchTweet(url) {
         try {
-            // Add a timestamp to bypass local caching
             const res = await fetch(`/api/fetch-tweet?url=${encodeURIComponent(url)}&t=${Date.now()}`);
             return await res.json();
         } catch (e) {
@@ -344,11 +330,7 @@ document.addEventListener('DOMContentLoaded', () => {
         mInputs[`name${index}`].value = data.author_name;
         mInputs[`handle${index}`].value = '@' + data.author_handle;
         mInputs[`text${index}`].value = data.content;
-        
-        // Store avatar URL in dataset to use in sync
         mInputs[`name${index}`].dataset.avatar = data.avatar_url;
-        
-        // Handle media
         if (data.media_url) {
             mInputs[`img${index}`].value = data.media_url;
         }
@@ -361,14 +343,12 @@ document.addEventListener('DOMContentLoaded', () => {
         btn.innerHTML = '<i data-lucide="loader-2" class="spin"></i> Exportation...';
         lucide.createIcons();
 
-        // Ensure layout is up to date
         updateLayout();
 
         const options = {
             quality: 1,
-            pixelRatio: 2.5, // 2.5 is safer/lighter for high resolution capture
+            pixelRatio: 2.5,
             cacheBust: true,
-            // Skip problematic style rules that cause SecurityError
             filter: (node) => {
                 const exclusionClasses = ['lucide', 'spin'];
                 if (node.classList) {
@@ -378,7 +358,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         };
 
-        // Delay to allow any pending DOM updates
         setTimeout(() => {
             htmlToImage.toPng(captureContainer, options)
                 .then((dataUrl) => {
@@ -386,16 +365,16 @@ document.addEventListener('DOMContentLoaded', () => {
                     link.download = `x-post-studio-${Date.now()}.png`;
                     link.href = dataUrl;
                     link.click();
-                    
                     btn.innerHTML = originalText;
                     lucide.createIcons();
                 })
                 .catch((error) => {
                     console.error('Export failed', error);
-                    alert("L'exportation a rencontré un problème. Essayez un format plus simple.");
+                    alert("L'exportation a rencontré un problème.");
                     btn.innerHTML = originalText;
                     lucide.createIcons();
                 });
+        }, 400);
     });
 });
 
