@@ -1,9 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // Check for file protocol
-    if (window.location.protocol === 'file:') {
-        alert("ATTENTION : Vous avez ouvert le fichier index.html directement. \n\nPour que l'application fonctionne, vous devez : \n1. Lancer le serveur (python server.py)\n2. Aller sur http://localhost:5000 dans votre navigateur.");
-    }
-
+    // UI Elements
     const btnFetch = document.getElementById('btn-fetch');
     const btnExport = document.getElementById('btn-export');
     const urlMain = document.getElementById('url-main');
@@ -13,8 +9,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const inputPadding = document.getElementById('input-padding');
     const bgPresets = document.querySelectorAll('.bg-preset');
     const formatBtns = document.querySelectorAll('.format-btn');
+    const watermarkEl = document.getElementById('watermark-logo');
+    const logoSelector = document.getElementById('logo-selector');
 
-    // Manual inputs
+    // Manual inputs mapping
     const mInputs = {
         name1: document.getElementById('m-name-1'),
         handle1: document.getElementById('m-handle-1'),
@@ -26,7 +24,7 @@ document.addEventListener('DOMContentLoaded', () => {
         img2: document.getElementById('m-img-2'),
     };
 
-    // Preview elements
+    // Preview elements mapping
     const preview = {
         name1: document.getElementById('name-1'),
         handle1: document.getElementById('handle-1'),
@@ -40,7 +38,6 @@ document.addEventListener('DOMContentLoaded', () => {
         media2: document.getElementById('media-2'),
     };
 
-    // State
     let isFetching = false;
 
     // Background Selection
@@ -48,18 +45,13 @@ document.addEventListener('DOMContentLoaded', () => {
         preset.addEventListener('click', () => {
             bgPresets.forEach(p => p.classList.remove('active'));
             preset.classList.add('active');
-            
             const bgClass = preset.dataset.bg;
-            // Remove old gradient classes but keep others
             captureContainer.classList.remove('gradient-1', 'gradient-2', 'gradient-3', 'gradient-4', 'solid-dark');
             captureContainer.classList.add(bgClass);
         });
     });
 
-    const watermarkEl = document.getElementById('watermark-logo');
-    const logoSelector = document.getElementById('logo-selector');
-
-    // Helper to add a logo to the UI
+    // Helper: Add logo to UI
     function addLogoItem(logo) {
         const div = document.createElement('div');
         div.className = 'logo-item';
@@ -73,22 +65,13 @@ document.addEventListener('DOMContentLoaded', () => {
             watermarkEl.classList.add('active');
             watermarkEl.style.display = 'block';
         });
-        
         logoSelector.appendChild(div);
-    };
+    }
 
-    // Dynamic Logo Loading
+    // Initialize Logos
     async function initLogos() {
-        const logoList = [
-            'digifoot_logo.png',
-            'digigoal_logo.png',
-            'digikits_logo.png',
-            'digilegends_logo.png',
-            'digiliink_logo.png'
-        ];
-
+        const logoList = ['digifoot_logo.png','digigoal_logo.png','digikits_logo.png','digilegends_logo.png','digiliink_logo.png'];
         try {
-            // Try to get dynamic list from server
             const resp = await fetch('/api/list-logos');
             if (resp.ok) {
                 const dynamicLogos = await resp.json();
@@ -105,7 +88,6 @@ document.addEventListener('DOMContentLoaded', () => {
             logoList.forEach(addLogoItem);
         }
 
-        // Handle "None" item
         const noneItem = logoSelector.querySelector('.logo-item[data-src=""]');
         if (noneItem) {
             noneItem.addEventListener('click', () => {
@@ -119,28 +101,12 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     initLogos();
 
-    // Format selection
-    formatBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
-            formatBtns.forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            
-            const ratio = btn.dataset.ratio;
-            // Remove old ratio classes
-            captureContainer.classList.remove('ratio-auto', 'ratio-1-1', 'ratio-4-5', 'ratio-9-16', 'ratio-4-3');
-            captureContainer.classList.add(`ratio-${ratio}`);
-            
-            // Re-calculate layout after animation
-            setTimeout(updateLayout, 450);
-        });
-    });
-
-    // Advanced Responsive Scaling Engine
+    // Scaling Logic
     function updateLayout() {
-        if (!frameEl) return;
-        const ratioData = document.querySelector('.format-btn.active').dataset.ratio;
+        if (!frameEl || !captureContainer) return;
+        const activeBtn = document.querySelector('.format-btn.active');
+        const ratioData = activeBtn ? activeBtn.dataset.ratio : 'auto';
         
-        // Target dimensions map
         const dims = {
             'auto': { w: 600, h: 'auto' },
             '1-1':  { w: 800, h: 800 },
@@ -151,22 +117,26 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const target = dims[ratioData] || dims['auto'];
         
-        // Apply dimensions directly to container
+        // 1. Set real size
         captureContainer.style.width = target.w + 'px';
         captureContainer.style.height = target.h === 'auto' ? 'auto' : (target.h + 'px');
 
-        // VISUAL SCALING FOR MOBILE PREVIEW
-        const parentW = captureContainer.parentElement.clientWidth;
-        const currentW = target.w;
-        if (currentW > parentW - 20) {
-            const visualScale = (parentW - 20) / currentW;
-            captureContainer.style.transform = `scale(${visualScale})`;
+        // 2. Visual Scale for Preview
+        const previewArea = document.querySelector('.preview-area');
+        if (previewArea) {
+            const availW = previewArea.clientWidth - 40;
+            const availH = previewArea.clientHeight - 40;
+            let vScale = 1;
+
+            if (target.w > availW) vScale = availW / target.w;
+            const currentH = captureContainer.offsetHeight;
+            if ((currentH * vScale) > availH) vScale = availH / currentH;
+
+            captureContainer.style.transform = `scale(${vScale})`;
             captureContainer.style.transformOrigin = 'center center';
-        } else {
-            captureContainer.style.transform = 'scale(1)';
         }
 
-        // Reset frame transform for measurement
+        // 3. Frame scaling (internal)
         frameEl.style.transform = 'translate(-50%, -50%) scale(1)';
         frameEl.style.width = '850px'; 
 
@@ -178,7 +148,6 @@ document.addEventListener('DOMContentLoaded', () => {
         
         let frameW = frameEl.offsetWidth;
         let frameH = frameEl.offsetHeight;
-        
         let scaleW = availableW / frameW;
         let scaleH = availableH / frameH;
         
@@ -193,13 +162,21 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Auto-update when content size changes
-    const resizeObserver = new ResizeObserver(() => {
-        updateLayout();
+    // Format selection
+    formatBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            formatBtns.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            const ratio = btn.dataset.ratio;
+            captureContainer.classList.remove('ratio-auto', 'ratio-1-1', 'ratio-4-5', 'ratio-9-16', 'ratio-4-3');
+            captureContainer.classList.add(`ratio-${ratio}`);
+            setTimeout(updateLayout, 100);
+        });
     });
+
+    const resizeObserver = new ResizeObserver(() => updateLayout());
     resizeObserver.observe(frameEl);
 
-    // Padding Control
     inputPadding.addEventListener('input', (e) => {
         captureContainer.style.padding = `${e.target.value}px`;
     });
@@ -210,179 +187,102 @@ document.addEventListener('DOMContentLoaded', () => {
         return `/api/proxy?url=${encodeURIComponent(url)}`;
     };
 
-    // Live sync manual inputs -> preview
     const syncManualToPreview = () => {
-        // Post 1
         preview.name1.textContent = mInputs.name1.value || 'Antigravity';
-        const h1 = mInputs.handle1.value || '@antigravity_ai';
-        preview.handle1.textContent = h1;
-        preview.content1.innerHTML = mInputs.text1.value.replace(/\n/g, '<br>') || 'Votre post ici...';
+        preview.handle1.textContent = mInputs.handle1.value || '@antigravity_ai';
+        preview.content1.innerHTML = mInputs.text1.value.replace(/\n/g, '<br>') || 'Texte...';
         
-        const cleanH1 = h1.replace('@', '');
-        const avatarUrl1 = mInputs.name1.dataset.avatar || `https://unavatar.io/twitter/${cleanH1}`;
+        const avatarUrl1 = mInputs.name1.dataset.avatar || `https://unavatar.io/twitter/${mInputs.handle1.value.replace('@','')}`;
         preview.avatar1.style.backgroundImage = `url('${getProxiedUrl(avatarUrl1)}')`;
 
         if (mInputs.img1.value) {
-            const proxiedUrl = getProxiedUrl(mInputs.img1.value);
-            preview.media1.innerHTML = `<img src="${proxiedUrl}" alt="media" crossorigin="anonymous">`;
+            preview.media1.innerHTML = `<img src="${getProxiedUrl(mInputs.img1.value)}" alt="media" crossorigin="anonymous">`;
             preview.media1.classList.add('active');
         } else {
             preview.media1.classList.remove('active');
-            preview.media1.innerHTML = '';
         }
 
-        // Post 2
-        preview.name2.textContent = mInputs.name2.value || 'User Reply';
-        const h2 = mInputs.handle2.value || '@reply_user';
-        preview.handle2.textContent = h2;
-        preview.content2.innerHTML = mInputs.text2.value.replace(/\n/g, '<br>') || 'Votre réponse ici...';
+        preview.name2.textContent = mInputs.name2.value || 'User';
+        preview.handle2.textContent = mInputs.handle2.value || '@reply';
+        preview.content2.innerHTML = mInputs.text2.value.replace(/\n/g, '<br>') || 'Reponse...';
         
-        const cleanH2 = h2.replace('@', '');
-        const avatarUrl2 = mInputs.name2.dataset.avatar || `https://unavatar.io/twitter/${cleanH2}`;
+        const avatarUrl2 = mInputs.name2.dataset.avatar || `https://unavatar.io/twitter/${mInputs.handle2.value.replace('@','')}`;
         preview.avatar2.style.backgroundImage = `url('${getProxiedUrl(avatarUrl2)}')`;
 
         if (mInputs.img2.value) {
-            const proxiedUrl = getProxiedUrl(mInputs.img2.value);
-            preview.media2.innerHTML = `<img src="${proxiedUrl}" alt="media" crossorigin="anonymous">`;
+            preview.media2.innerHTML = `<img src="${getProxiedUrl(mInputs.img2.value)}" alt="media" crossorigin="anonymous">`;
             preview.media2.classList.add('active');
         } else {
             preview.media2.classList.remove('active');
-            preview.media2.innerHTML = '';
         }
 
         setTimeout(updateLayout, 50);
     };
 
-    [...Object.values(mInputs)].forEach(input => {
-        input.addEventListener('input', syncManualToPreview);
-    });
-
-    // Drag & Drop for images
-    const setupDragAndDrop = (inputId, postIndex) => {
-        const input = document.getElementById(inputId);
-        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-            input.addEventListener(eventName, (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-            }, false);
-        });
-
-        input.addEventListener('drop', (e) => {
-            const file = e.dataTransfer.files[0];
-            if (file && file.type.startsWith('image/')) {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    input.value = e.target.result;
-                    syncManualToPreview();
-                };
-                reader.readAsDataURL(file);
-            }
-        }, false);
-    };
-
-    setupDragAndDrop('m-img-1', 1);
-    setupDragAndDrop('m-img-2', 2);
+    [...Object.values(mInputs)].forEach(input => input.addEventListener('input', syncManualToPreview));
 
     // Fetch Logic
     btnFetch.addEventListener('click', async () => {
         if (isFetching) return;
         const urls = [urlMain.value, urlReply.value].filter(u => u.trim() !== '');
-        if (urls.length === 0) {
-            alert('Veuillez entrer au moins un lien X.');
-            return;
-        }
+        if (urls.length === 0) return alert('Lien requis.');
 
         isFetching = true;
-        btnFetch.innerHTML = '<i data-lucide="loader-2" class="spin"></i> Récupération...';
-        lucide.createIcons();
-
+        btnFetch.innerHTML = 'Chargement...';
         try {
             if (urlMain.value) {
-                const data = await fetchTweet(urlMain.value);
-                if (data.success) updateInputs(1, data);
-                else alert('Erreur Post 1 : ' + (data.message || 'Impossible de récupérer le post.'));
+                const resp = await fetch(`/api/fetch-tweet?url=${encodeURIComponent(urlMain.value)}`);
+                const data = await resp.json();
+                if (data.success) {
+                    mInputs.name1.value = data.author_name;
+                    mInputs.handle1.value = '@' + data.author_handle;
+                    mInputs.text1.value = data.content;
+                    mInputs.name1.dataset.avatar = data.avatar_url;
+                    if (data.media_url) mInputs.img1.value = data.media_url;
+                }
             }
             if (urlReply.value) {
-                const data = await fetchTweet(urlReply.value);
-                if (data.success) updateInputs(2, data);
-                else alert('Erreur Post 2 : ' + (data.message || 'Impossible de récupérer le post.'));
+                const resp = await fetch(`/api/fetch-tweet?url=${encodeURIComponent(urlReply.value)}`);
+                const data = await resp.json();
+                if (data.success) {
+                    mInputs.name2.value = data.author_name;
+                    mInputs.handle2.value = '@' + data.author_handle;
+                    mInputs.text2.value = data.content;
+                    mInputs.name2.dataset.avatar = data.avatar_url;
+                    if (data.media_url) mInputs.img2.value = data.media_url;
+                }
             }
             syncManualToPreview();
-        } catch (err) {
-            console.error(err);
-        } finally {
-            isFetching = false;
-            btnFetch.innerHTML = '<i data-lucide="download"></i> Récupérer les posts';
-            lucide.createIcons();
+        } catch (e) { console.error(e); }
+        finally {
+             isFetching = false;
+             btnFetch.innerHTML = 'Récupérer les posts';
         }
     });
-
-    async function fetchTweet(url) {
-        try {
-            const res = await fetch(`/api/fetch-tweet?url=${encodeURIComponent(url)}&t=${Date.now()}`);
-            return await res.json();
-        } catch (e) {
-            return { success: false };
-        }
-    }
-
-    function updateInputs(index, data) {
-        mInputs[`name${index}`].value = data.author_name;
-        mInputs[`handle${index}`].value = '@' + data.author_handle;
-        mInputs[`text${index}`].value = data.content;
-        mInputs[`name${index}`].dataset.avatar = data.avatar_url;
-        if (data.media_url) {
-            mInputs[`img${index}`].value = data.media_url;
-        }
-    }
 
     // Export Logic
     btnExport.addEventListener('click', () => {
-        const btn = btnExport;
-        const originalText = btn.innerHTML;
-        btn.innerHTML = '<i data-lucide="loader-2" class="spin"></i> Exportation...';
-        lucide.createIcons();
-
+        btnExport.innerHTML = 'Exportation...';
         updateLayout();
-
-        const options = {
-            quality: 1,
-            pixelRatio: 2.5,
-            cacheBust: true,
-            filter: (node) => {
-                const exclusionClasses = ['lucide', 'spin'];
-                if (node.classList) {
-                    return !exclusionClasses.some(cls => node.classList.contains(cls));
-                }
-                return true;
-            }
-        };
-
         setTimeout(() => {
-            htmlToImage.toPng(captureContainer, options)
-                .then((dataUrl) => {
+            htmlToImage.toPng(captureContainer, { quality:1, pixelRatio:2.5, cacheBust:true })
+                .then(dataUrl => {
                     const link = document.createElement('a');
-                    link.download = `x-post-studio-${Date.now()}.png`;
+                    link.download = `x-post-${Date.now()}.png`;
                     link.href = dataUrl;
                     link.click();
-                    btn.innerHTML = originalText;
-                    lucide.createIcons();
+                    btnExport.innerHTML = 'Exporter en Image';
                 })
-                .catch((error) => {
-                    console.error('Export failed', error);
-                    alert("L'exportation a rencontré un problème.");
-                    btn.innerHTML = originalText;
-                    lucide.createIcons();
+                .catch(err => {
+                    console.error(err);
+                    btnExport.innerHTML = 'Exporter en Image';
                 });
-        }, 400);
+        }, 500);
     });
 });
 
-// Register Service Worker for PWA
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/service-worker.js')
-            .then(reg => console.log('Service Worker enregistré !'))
-            .catch(err => console.log('Erreur SW:', err));
+        navigator.serviceWorker.register('/service-worker.js').catch(e => console.error(e));
     });
 }
