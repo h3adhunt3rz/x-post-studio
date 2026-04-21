@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>X-Post Studio | Reply + Quote</title>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" crossorigin="anonymous">
+    <!-- Style -->
+    <link rel="stylesheet" href="style.css">
+    <!-- Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="dark-theme">
+    <div class="app-container">
+        <!-- Sidebar / Controls -->
+        <aside class="controls">
+            <header>
+                <div class="logo">
+                    <i data-lucide="sparkles"></i>
+                    <span>X-Post Studio</span>
+                </div>
+                <p>Créez de superbes visuels de vos posts X</p>
+            </header>
+
+            <section class="control-group">
+                <h3><i data-lucide="link"></i> Sources</h3>
+                <div class="input-wrapper">
+                    <label>Post Principal (X URL)</label>
+                    <input type="text" id="url-main" placeholder="https://x.com/user/status/..." autocomplete="off">
+                </div>
+                <div class="input-wrapper">
+                    <label>Réponse / Citation (X URL)</label>
+                    <input type="text" id="url-reply" placeholder="https://x.com/user/status/..." autocomplete="off">
+                </div>
+                <button id="btn-fetch" class="btn-primary">
+                    <i data-lucide="download"></i> Récupérer les posts
+                </button>
+            </section>
+
+            <section class="control-group">
+                <h3><i data-lucide="maximize"></i> Format & Dimensions</h3>
+                <div class="format-grid">
+                    <button class="format-btn active" data-ratio="auto" title="Auto">Auto</button>
+                    <button class="format-btn" data-ratio="1-1" title="Instagram / Square">
+                        <i data-lucide="square"></i> 1:1
+                    </button>
+                    <button class="format-btn" data-ratio="4-5" title="Insta Portrait">
+                        <i data-lucide="rectangle-vertical"></i> 4:5
+                    </button>
+                    <button class="format-btn" data-ratio="9-16" title="Story / Reel">
+                        <i data-lucide="smartphone"></i> 9:16
+                    </button>
+                    <button class="format-btn" data-ratio="4-3" title="X / Landscape">
+                        <i data-lucide="rectangle-horizontal"></i> 4:3
+                    </button>
+                </div>
+            </section>
+
+            <section class="control-group">
+                <div class="control-row">
+                    <label>Background</label>
+                    <div class="bg-presets">
+                        <div class="bg-preset p1" data-bg="gradient-1"></div>
+                        <div class="bg-preset p2" data-bg="gradient-2"></div>
+                        <div class="bg-preset p3" data-bg="gradient-3"></div>
+                        <div class="bg-preset p4" data-bg="gradient-4"></div>
+                        <div class="bg-preset p5" data-bg="solid-dark"></div>
+                    </div>
+                </div>
+
+                <div class="control-row">
+                    <label>Padding</label>
+                    <input type="range" id="input-padding" min="20" max="120" value="60">
+                </div>
+                
+            <div class="control-group">
+                <h3><i data-lucide="award"></i> Logo / Branding</h3>
+                <div class="logo-grid" id="logo-selector">
+                    <div class="logo-item active" data-src="">None</div>
+                    <!-- Logos loaded dynamically here -->
+                </div>
+            </div>
+            </section>
+
+                <section class="control-group">
+                <h3><i data-lucide="edit-3"></i> Édition Manuelle</h3>
+                <details>
+                    <summary>Modifier les détails</summary>
+                    <div id="manual-inputs">
+                        <!-- Will be populated for both posts -->
+                         <div class="manual-post">
+                            <p>Post 1 (Main)</p>
+                            <input type="text" id="m-name-1" placeholder="Nom">
+                            <input type="text" id="m-handle-1" placeholder="@handle">
+                            <textarea id="m-text-1" placeholder="Texte du post"></textarea>
+                            <div class="input-wrapper">
+                                <label>Image du Post</label>
+                                <input type="text" id="m-img-1" placeholder="URL de l'image ou glisser-déposer">
+                            </div>
+                         </div>
+                         <div class="manual-post">
+                            <p>Post 2 (Reply)</p>
+                            <input type="text" id="m-name-2" placeholder="Nom">
+                            <input type="text" id="m-handle-2" placeholder="@handle">
+                            <textarea id="m-text-2" placeholder="Texte du post"></textarea>
+                            <div class="input-wrapper">
+                                <label>Image du Post</label>
+                                <input type="text" id="m-img-2" placeholder="URL de l'image ou glisser-déposer">
+                            </div>
+                         </div>
+                    </div>
+                </details>
+            </section>
+
+            <footer class="controls-footer">
+                <button id="btn-export" class="btn-export">
+                    <i data-lucide="image"></i> Exporter en Image
+                </button>
+            </footer>
+        </aside>
+
+        <!-- Preview Area -->
+        <main class="preview-area">
+            <div id="capture-container" class="capture-container gradient-1">
+                <div class="frame-wrapper" id="frame-wrapper">
+                    <div class="frame" id="frame-el">
+                        
+                        <!-- Main Post -->
+                        <div id="post-main" class="tweet-block">
+                            <div class="tweet-header">
+                                <div class="avatar" id="avatar-1"></div>
+                                <div class="user-info">
+                                    <div class="name" id="name-1">Antigravity</div>
+                                    <div class="handle" id="handle-1">@antigravity_ai</div>
+                                </div>
+                                <div class="x-logo">
+                                    <svg viewBox="0 0 24 24" aria-hidden="true"><g><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"></path></g></svg>
+                                </div>
+                            </div>
+                            <div class="tweet-content" id="content-1">
+                                Ceci est un exemple de post. Collez un lien pour le mettre à jour automatiquement ou modifiez-le manuellement dans la barre latérale.
+                            </div>
+                            <div class="tweet-media" id="media-1"></div>
+                        </div>
+
+                        <!-- Connection Line (visual) -->
+                        <div class="connection-line"></div>
+
+                        <!-- Reply Post -->
+                        <div id="post-reply" class="tweet-block reply-block">
+                            <div class="tweet-header">
+                                <div class="avatar" id="avatar-2"></div>
+                                <div class="user-info">
+                                    <div class="name" id="name-2">User Reply</div>
+                                    <div class="handle" id="handle-2">@reply_user</div>
+                                </div>
+                            </div>
+                            <div class="tweet-content" id="content-2">
+                                Ceci est la réponse au post précédent. Vous pouvez ajuster le design et le contenu à votre guise !
+                            </div>
+                            <div class="tweet-media" id="media-2"></div>
+                        </div>
+
+                    </div>
+                </div>
+                <!-- Watermark Logo -->
+                <img id="watermark-logo" class="watermark-logo" src="" alt="" style="display: none;">
+            </div>
+        </main>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html-to-image/1.11.11/html-to-image.min.js"></script>
+    <script src="script.js"></script>
+    <script>
+        lucide.createIcons();
+    </script>
+</body>
+</html>
