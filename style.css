@@ -504,6 +504,7 @@ summary {
         padding: 40px 15px;
         min-height: 500px;
         background-attachment: scroll;
+        overflow: hidden; /* Prevent scrolls during scaling */
     }
 }
 
@@ -523,6 +524,15 @@ summary {
     
     .control-group {
         padding: 16px;
+    }
+
+    .logo-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+    }
+
+    .logo-item {
+        height: 50px;
     }
 }
 

@@ -72,30 +72,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const logoSelector = document.getElementById('logo-selector');
         
         // Helper to add a logo to the UI
-        const addLogoItem = (logo) => {
-            const div = document.createElement('div');
-            div.className = 'logo-item';
-            div.dataset.src = `./logos/${logo}`;
-            div.innerHTML = `<img src="./logos/${logo}" alt="logo" crossorigin="anonymous">`;
-            
-            div.addEventListener('click', () => {
-                document.querySelectorAll('.logo-item').forEach(l => l.classList.remove('active'));
-                div.classList.add('active');
-                watermarkEl.src = getProxiedUrl(`./logos/${logo}`);
-                watermarkEl.classList.add('active');
-                watermarkEl.style.display = 'block';
-            });
-            
-            logoSelector.appendChild(div);
-        };
-
-        try {
-            // Try to get dynamic list from server
-            const resp = await fetch('/api/list-logos');
-            if (resp.ok) {
-                const dynamicLogos = await resp.json();
-                if (dynamicLogos.length > 0) {
-                    // Clear and use server list if available
                     logoSelector.innerHTML = '<div class="logo-item active" data-src="">None</div>';
                     dynamicLogos.forEach(addLogoItem);
                 } else {
@@ -108,6 +84,26 @@ document.addEventListener('DOMContentLoaded', () => {
             // Fallback to hardcoded list if server is down
             logoList.forEach(addLogoItem);
         }
+    }
+
+    // Helper to add a logo to the UI
+    function addLogoItem(logo) {
+        const div = document.createElement('div');
+        div.className = 'logo-item';
+        div.dataset.src = `/logos/${logo}`;
+        div.innerHTML = `<img src="/logos/${logo}" alt="logo" crossorigin="anonymous">`;
+        
+        div.addEventListener('click', () => {
+            document.querySelectorAll('.logo-item').forEach(l => l.classList.remove('active'));
+            div.classList.add('active');
+            watermarkEl.src = getProxiedUrl(`/logos/${logo}`);
+            watermarkEl.classList.add('active');
+            watermarkEl.style.display = 'block';
+        });
+        
+        const logoSelector = document.getElementById('logo-selector');
+        logoSelector.appendChild(div);
+    };
 
         // Handle "None" item
         const noneItem = logoSelector.querySelector('.logo-item[data-src=""]');
@@ -158,6 +154,18 @@ document.addEventListener('DOMContentLoaded', () => {
         // Apply dimensions directly to container
         captureContainer.style.width = target.w + 'px';
         captureContainer.style.height = target.h === 'auto' ? 'auto' : (target.h + 'px');
+
+        // VISUAL SCALING FOR MOBILE PREVIEW
+        // If container is wider than the preview area, scale it down visually
+        const parentW = captureContainer.parentElement.clientWidth;
+        const currentW = target.w;
+        if (currentW > parentW - 20) {
+            const visualScale = (parentW - 20) / currentW;
+            captureContainer.style.transform = `scale(${visualScale})`;
+            captureContainer.style.transformOrigin = 'center center';
+        } else {
+            captureContainer.style.transform = 'scale(1)';
+        }
 
         // Reset frame transform for measurement
         frameEl.style.transform = 'translate(-50%, -50%) scale(1)';
