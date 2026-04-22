@@ -214,23 +214,31 @@ document.addEventListener('DOMContentLoaded', () => {
             scale: 2,
             width: 800,
             height: 1000,
+            windowWidth: 1200, // On simule un écran large pour éviter les écrasements mobile
+            windowHeight: 1200,
             x: 0,
             y: 0,
-            scrollX: -window.scrollX, // Compense le scroll de la page
-            scrollY: -window.scrollY,
+            scrollX: 0, 
+            scrollY: 0,
             logging: false,
             onclone: (clonedDoc) => {
                 const el = clonedDoc.getElementById('capture-container');
                 if (el) {
-                    // Force la réinitialisation complète dans le clone
+                    // Force la réinitialisation complète dans le clone pour le rendu exact
                     el.style.transform = 'none';
                     el.style.borderRadius = '0';
                     el.style.boxShadow = 'none';
                     el.style.margin = '0';
-                    el.style.position = 'relative';
+                    el.style.position = 'fixed'; // Évite les problèmes de scroll
                     el.style.top = '0';
                     el.style.left = '0';
+                    el.style.width = '800px';
+                    el.style.height = '1000px';
+                    el.style.display = 'flex';
                 }
+                // On s'assure que le body du clone ne contraint pas l'élément
+                clonedDoc.body.style.width = '1200px';
+                clonedDoc.body.style.height = '1200px';
             }
         };
 
