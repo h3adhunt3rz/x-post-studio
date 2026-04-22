@@ -145,7 +145,16 @@ document.addEventListener('DOMContentLoaded', () => {
     function updateLayout() {
         const pArea = document.querySelector('.preview-area');
         if(!pArea || !ui.captureContainer) return;
-        const vScale = Math.min((pArea.clientWidth - 20) / 800, (pArea.clientHeight - 20) / (ui.captureContainer.offsetHeight || 1000), 1);
+        
+        const pad = 30; // Marge de sécurité
+        const availableW = pArea.clientWidth - pad;
+        const availableH = pArea.clientHeight - pad;
+        
+        const scaleW = availableW / 800;
+        const scaleH = availableH / 1000;
+        
+        const vScale = Math.min(scaleW, scaleH, 1);
+        
         ui.captureContainer.style.transformOrigin = 'center center';
         ui.captureContainer.style.transform = `scale(${vScale})`;
     }

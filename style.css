@@ -58,8 +58,15 @@ input[type="text"], textarea { background: #000; border: 1px solid var(--glass-b
     overflow: hidden; 
     box-shadow: 0 40px 100px rgba(0,0,0,0.6); 
     transition: transform 0.3s ease; 
+    flex-shrink: 0; /* Important pour garder la taille */
 }
-.capture-container.format-4-5 { width: 800px; height: 1000px; border-radius: 32px; }
+.capture-container.format-4-5 { 
+    width: 800px; 
+    height: 1000px; 
+    min-width: 800px; 
+    min-height: 1000px;
+    border-radius: 32px; 
+}
 
 .bg-overlay {
     position: absolute;
@@ -154,5 +161,15 @@ input[type="text"], textarea { background: #000; border: 1px solid var(--glass-b
     body { overflow: auto; height: auto; }
     .app-container { flex-direction: column; }
     .controls { width: 100%; order: 2; height: auto; }
-    .preview-area { order: 1; min-height: 400px; padding: 20px; }
+    .preview-area { 
+        order: 1; 
+        height: 60vh; /* Hauteur fixe pour forcer un aperçu proportionnel */
+        min-height: 450px; 
+        padding: 15px; 
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        background: #050a14;
+        border-bottom: 1px solid var(--glass-border);
+    }
 }
