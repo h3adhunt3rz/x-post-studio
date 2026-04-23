@@ -8,7 +8,6 @@ document.addEventListener('DOMContentLoaded', () => {
         bgOverlay: document.getElementById('bg-overlay'),
         mainCard: document.getElementById('main-card'),
         inputBgColor: document.getElementById('input-bg-color'),
-        inputTextColor: document.getElementById('input-text-color'),
         inputBgOpacity: document.getElementById('input-bg-opacity'),
         inputBgShadow: document.getElementById('input-bg-shadow'),
         inputTextZoom1: document.getElementById('input-text-zoom-1'),
@@ -19,17 +18,17 @@ document.addEventListener('DOMContentLoaded', () => {
         inputLineHeight: document.getElementById('input-line-height'),
         inputSplitPos: document.getElementById('input-split-pos'),
         horizontalDivider: document.getElementById('horizontal-divider'),
-        inputLogoZoom1: document.getElementById('input-logo-zoom-1'),
-        inputLogoZoom2: document.getElementById('input-logo-zoom-2'),
         inputLogoTrademarkZoom: document.getElementById('input-logo-trademark-zoom'),
         inputLogoTrademarkOpacity: document.getElementById('input-logo-trademark-opacity'),
-        inputLogoOpacity: document.getElementById('input-logo-opacity'),
         inputCustomLogo: document.getElementById('input-custom-logo'),
-        checkLogo1: document.getElementById('check-logo-1'),
-        checkLogo2: document.getElementById('check-logo-2'),
         checkTrademark: document.getElementById('check-logo-trademark'),
+        inputMediaBlur: document.getElementById('input-media-blur'),
+        btnMediaMirror: document.getElementById('btn-media-mirror'),
+        checkMediaGrayscale: document.getElementById('check-media-grayscale'),
         watermarkTrademark: document.getElementById('watermark-trademark'),
-        replyContainer: document.getElementById('reply-container')
+        replyContainer: document.getElementById('reply-container'),
+        btnProjectFoot: document.getElementById('btn-project-foot'),
+        btnProjectPolitics: document.getElementById('btn-project-politics')
     };
 
     const mInputs = {
@@ -43,14 +42,38 @@ document.addEventListener('DOMContentLoaded', () => {
         name2: document.getElementById('name-2'), handle2: document.getElementById('handle-2'), content2: document.getElementById('content-2'), avatar2: document.getElementById('avatar-2'),
         media2: document.getElementById('tweet-media-2'), watermark2: document.getElementById('media-watermark-2')
     };
-
-    let selectedLogoSrc = "";
+    
+    let currentProject = 'foot';
+    let selectedLogoSrc = ""; // On revient à un seul logo global pour éviter les disparitions
+    
+    const updateActiveLogo = () => {
+        // Le logo reste persistant
+        refreshUI();
+    };
 
     function hexToRgba(hex, opacity) {
         let r=0, g=0, b=0;
         if (hex.length == 4) { r = parseInt(hex[1]+hex[1], 16); g = parseInt(hex[2]+hex[2], 16); b = parseInt(hex[3]+hex[3], 16); }
         else { r = parseInt(hex.substring(1,3), 16); g = parseInt(hex.substring(3,5), 16); b = parseInt(hex.substring(5,7), 16); }
         return `rgba(${r},${g},${b},${opacity})`;
+    }
+
+    function darkenColor(hex, percent) {
+        let r = parseInt(hex.substring(1,3), 16);
+        let g = parseInt(hex.substring(3,5), 16);
+        let b = parseInt(hex.substring(5,7), 16);
+        r = Math.floor(r * (1 - percent / 100));
+        g = Math.floor(g * (1 - percent / 100));
+        b = Math.floor(b * (1 - percent / 100));
+        return `rgb(${r},${g},${b})`;
+    }
+
+    function getContrastColor(hex) {
+        const r = parseInt(hex.substring(1,3), 16);
+        const g = parseInt(hex.substring(3,5), 16);
+        const b = parseInt(hex.substring(5,7), 16);
+        const yiq = ((r*299)+(g*587)+(b*114))/1000;
+        return (yiq >= 128) ? '#000000' : '#ffffff';
     }
 
     const getProxiedUrl = (url) => {
@@ -63,8 +86,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const refreshUI = () => {
         if(ui.captureContainer) {
             const bgOpac = ui.inputBgOpacity.value / 100;
-            ui.captureContainer.style.background = hexToRgba(ui.inputBgColor.value, bgOpac);
-            ui.captureContainer.style.color = ui.inputTextColor.value;
+            const bgColor = ui.inputBgColor.value;
+            const textColor = getContrastColor(bgColor);
+            ui.captureContainer.style.background = hexToRgba(bgColor, bgOpac);
+            ui.captureContainer.style.color = textColor;
         }
         if(ui.bgOverlay) {
             const sh = ui.inputBgShadow.value / 100;
@@ -72,7 +97,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         const lineH = ui.inputLineHeight.value / 100;
         const splitPos = ui.inputSplitPos.value;
-        const logoOpac = ui.inputLogoOpacity.value / 100;
 
         if(preview.content1) { preview.content1.style.fontSize = `${ui.inputTextZoom1.value}px`; preview.content1.style.lineHeight = `${lineH}`; }
         if(preview.content2) { preview.content2.style.fontSize = `${ui.inputTextZoom2.value}px`; preview.content2.style.lineHeight = `${lineH}`; }
@@ -83,6 +107,22 @@ document.addEventListener('DOMContentLoaded', () => {
         if(ui.mainCard) {
             const hasReply = ui.replyContainer.style.display !== 'none';
             ui.mainCard.style.gridTemplateRows = hasReply ? `${splitPos}% auto 1fr` : `1fr 0 0`;
+        }
+        if (ui.horizontalDivider) {
+            if (currentProject === 'politics') {
+                // Politique : Trait subtil mais plus visible (5px + transparence)
+                const bgColor = ui.inputBgColor.value;
+                const isDark = getContrastColor(bgColor) === '#ffffff';
+                ui.horizontalDivider.style.background = isDark ? hexToRgba('#ffffff', 0.2) : darkenColor(bgColor, 40);
+                ui.horizontalDivider.style.height = '5px';
+                ui.horizontalDivider.style.opacity = 0.8;
+            } else {
+                // Football : Trait "normal" (5px)
+                const textColor = getContrastColor(ui.inputBgColor.value);
+                ui.horizontalDivider.style.background = textColor;
+                ui.horizontalDivider.style.height = '5px';
+                ui.horizontalDivider.style.opacity = 0.4;
+            }
         }
         if (preview.media1) { 
             const h1 = `${ui.inputMediaZoom1.value}px`;
@@ -97,37 +137,45 @@ document.addEventListener('DOMContentLoaded', () => {
             if (img2) img2.style.maxHeight = h2; 
         }
 
-        const showC1 = ui.checkLogo1.checked && selectedLogoSrc !== "";
-        const showC2 = ui.checkLogo2.checked && selectedLogoSrc !== "";
         const showTM = ui.checkTrademark.checked && selectedLogoSrc !== "";
 
-        if(preview.watermark1) {
-            preview.watermark1.src = selectedLogoSrc;
-            preview.watermark1.style.width = `${ui.inputLogoZoom1.value}%`;
-            preview.watermark1.style.opacity = logoOpac;
-            preview.watermark1.style.display = (showC1 && mInputs.img1.value) ? 'block' : 'none';
-        }
-        if(preview.watermark2) {
-            preview.watermark2.src = selectedLogoSrc;
-            preview.watermark2.style.width = `${ui.inputLogoZoom2.value}%`;
-            preview.watermark2.style.opacity = logoOpac;
-            preview.watermark2.style.display = (showC2 && mInputs.img2.value) ? 'block' : 'none';
-        }
         if(ui.watermarkTrademark) {
             ui.watermarkTrademark.src = selectedLogoSrc;
             ui.watermarkTrademark.style.opacity = ui.inputLogoTrademarkOpacity.value / 100;
             ui.watermarkTrademark.style.width = `${ui.inputLogoTrademarkZoom.value}%`;
             ui.watermarkTrademark.style.display = showTM ? 'block' : 'none';
         }
+
+        const blurVal = ui.inputMediaBlur.value;
+        const isMirrored = ui.btnMediaMirror.classList.contains('active');
+        const isGrayscale = ui.checkMediaGrayscale.checked;
+
+        document.querySelectorAll('.tweet-media-wrapper').forEach(w => {
+            const hasBlur = blurVal > 0;
+            w.classList.toggle('blur-active', hasBlur);
+            w.classList.toggle('mirrored', isMirrored);
+            
+            const img = w.querySelector('.tweet-media img');
+            if (img) {
+                let filters = [];
+                if (hasBlur) filters.push(`blur(${blurVal}px)`);
+                if (isGrayscale) {
+                    filters.push('grayscale(100%)');
+                    filters.push('contrast(1.1)');
+                }
+                img.style.filter = filters.join(' ') || 'none';
+            }
+        });
+
         updateLayout();
     };
 
     const ctrls = [
-        ui.inputBgColor, ui.inputTextColor, ui.inputBgOpacity, ui.inputBgShadow,
+        ui.inputBgColor, ui.inputBgOpacity, ui.inputBgShadow,
         ui.inputTextZoom1, ui.inputTextZoom2, ui.inputAvatarZoom, 
         ui.inputMediaZoom1, ui.inputMediaZoom2, ui.inputLineHeight, ui.inputSplitPos, 
-        ui.inputLogoZoom1, ui.inputLogoZoom2, ui.inputLogoTrademarkZoom, ui.inputLogoTrademarkOpacity, ui.inputLogoOpacity, 
-        ui.checkLogo1, ui.checkLogo2, ui.checkTrademark
+        ui.inputLogoTrademarkZoom, ui.inputLogoTrademarkOpacity, 
+        ui.checkTrademark, ui.inputMediaBlur, ui.checkMediaGrayscale
     ];
     ctrls.forEach(c => { if(c) c.oninput = refreshUI; });
 
@@ -141,6 +189,29 @@ document.addEventListener('DOMContentLoaded', () => {
         };
         reader.readAsDataURL(file);
     };
+    
+    ui.btnMediaMirror.onclick = () => {
+        ui.btnMediaMirror.classList.toggle('active');
+        refreshUI();
+    };
+
+    const switchProject = (project) => {
+        currentProject = project;
+        document.body.classList.remove('theme-foot', 'theme-politics');
+        document.body.classList.add(`theme-${project}`);
+        
+        ui.btnProjectFoot.classList.toggle('active', project === 'foot');
+        ui.btnProjectPolitics.classList.toggle('active', project === 'politics');
+
+        // On ne réinitialise plus les couleurs et tailles pour laisser le choix à l'utilisateur
+        refreshUI();
+    };
+
+    ui.btnProjectFoot.onclick = () => switchProject('foot');
+    ui.btnProjectPolitics.onclick = () => switchProject('politics');
+    
+    // Initialisation forcée
+    switchProject('foot');
 
     function updateLayout() {
         const pArea = document.querySelector('.preview-area');
@@ -235,7 +306,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (el) {
                     // Force la réinitialisation complète dans le clone pour le rendu exact
                     el.style.transform = 'none';
-                    el.style.borderRadius = '0';
                     el.style.boxShadow = 'none';
                     el.style.margin = '0';
                     el.style.position = 'fixed'; // Évite les problèmes de scroll

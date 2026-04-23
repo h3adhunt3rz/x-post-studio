@@ -6,6 +6,8 @@
     --glass-border: rgba(255, 255, 255, 0.1);
     --font-main: 'Inter', sans-serif;
     --font-heading: 'Outfit', sans-serif;
+    --font-politics: 'Merriweather', serif;
+    --font-foot: 'Montserrat', sans-serif;
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -28,6 +30,34 @@ body { background: var(--bg-app); color: var(--text-primary); font-family: var(-
 .control-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
 
 .logo { display: flex; align-items: center; gap: 10px; font-size: 1.1rem; font-weight: 800; font-family: var(--font-heading); color: var(--accent); }
+
+.project-switch {
+    display: flex;
+    background: rgba(0, 0, 0, 0.3);
+    padding: 4px;
+    border-radius: 10px;
+    gap: 4px;
+    margin-top: 5px;
+}
+.project-btn {
+    flex: 1;
+    border: none;
+    background: transparent;
+    color: white;
+    font-size: 0.65rem;
+    font-weight: 800;
+    padding: 8px;
+    border-radius: 7px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    opacity: 0.5;
+}
+.project-btn.active {
+    background: var(--accent);
+    opacity: 1;
+    box-shadow: 0 4px 10px rgba(59, 130, 246, 0.3);
+}
+
 .control-group { background: rgba(255, 255, 255, 0.04); padding: 10px; border-radius: 12px; border: 1px solid var(--glass-border); display: flex; flex-direction: column; gap: 8px; }
 .control-group h3 { font-size: 0.75rem; font-family: var(--font-heading); opacity: 0.7; text-transform: uppercase; letter-spacing: 0.5px; }
 
@@ -42,6 +72,8 @@ body { background: var(--bg-app); color: var(--text-primary); font-family: var(-
 
 input[type="text"], textarea { background: #000; border: 1px solid var(--glass-border); border-radius: 8px; padding: 8px; color: white; font-size: 0.85rem; width: 100%; }
 .btn-primary { background: var(--accent); color: white; border: none; padding: 10px; border-radius: 8px; font-weight: 700; cursor: pointer; }
+.btn-small { background: rgba(255,255,255,0.1); color: white; border: 1px solid var(--glass-border); padding: 5px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.btn-small.active { background: var(--accent); border-color: var(--accent); }
 
 .toggle-row { display: flex; align-items: center; justify-content: space-between; font-size: 0.75rem; opacity: 0.8; }
 .btn-export { background: white; color: black; border: none; font-weight: 800; padding: 14px; border-radius: 8px; cursor: pointer; margin-top: auto; }
@@ -54,7 +86,8 @@ input[type="text"], textarea { background: #000; border: 1px solid var(--glass-b
     display: flex; 
     flex-direction: column; 
     align-items: center; 
-    justify-content: center; 
+    justify-content: flex-start; 
+    padding-top: 20px; /* Réduit de 60px à 20px pour monter plus haut */
     overflow: hidden; 
     box-shadow: 0 40px 100px rgba(0,0,0,0.6); 
     transition: transform 0.3s ease; 
@@ -79,11 +112,12 @@ input[type="text"], textarea { background: #000; border: 1px solid var(--glass-b
 
 .post-card { 
     width: 90%; 
-    height: 90%; /* On occupe plus d'espace vertical */
+    height: auto;
+    min-height: 90%;
     display: grid; 
-    grid-template-rows: 1fr auto auto; /* Main / Divider / Reply */
+    grid-template-rows: 1fr auto auto; 
     gap: 0; 
-    z-index: 5; 
+    z-index: 5;
 }
 
 .tweet-block { 
@@ -91,19 +125,30 @@ input[type="text"], textarea { background: #000; border: 1px solid var(--glass-b
     flex-direction: column; 
     gap: 10px; 
     position: relative; 
-    overflow: hidden; /* Important pour le split */
-    justify-content: center; /* Centrer le contenu dans l'espace alloué */
+    overflow: hidden;
+    justify-content: flex-start;
+    padding-top: 5px; 
 }
 .tweet-header { display: flex; align-items: center; gap: 12px; }
-.avatar { border-radius: 50%; background: #222; background-size: cover; border: 1px solid rgba(255,255,255,0.1); flex-shrink: 0; }
+.avatar { 
+    border-radius: 50%; 
+    background: #222; 
+    background-size: cover; 
+    border: none; 
+    flex-shrink: 0; 
+}
 .user-info .name { font-weight: 700; font-size: 1.25em; line-height: 1.1; color: inherit; }
 .user-info .handle { font-size: 0.9em; opacity: 0.6; color: inherit; }
 
-.tweet-content { line-height: 1.4; color: inherit; white-space: pre-wrap; font-size: 1rem; }
+.tweet-content { 
+    line-height: 1.4; 
+    color: inherit; 
+    white-space: pre-wrap; 
+}
 
 /* Media & Watermark System */
 .tweet-media-wrapper { position: relative; margin-top: 10px; line-height: 0; }
-.tweet-media { border-radius: 12px; overflow: hidden; display: none; }
+.tweet-media { border-radius: 12px; overflow: hidden; display: none; background: transparent; }
 .tweet-media.active { display: block; }
 .tweet-media img { max-width: 100%; height: auto; display: block; margin: 0 auto; border-radius: inherit; }
 
@@ -111,20 +156,55 @@ input[type="text"], textarea { background: #000; border: 1px solid var(--glass-b
     position: absolute;
     top: 50%;
     left: 50%;
-    transform: translate(-50%, -50%); /* Centrage parfait */
+    transform: translate(-50%, -50%);
     width: 25%;
     pointer-events: none;
     z-index: 10;
     display: none;
 }
+
+.tweet-media-wrapper.blur-active img {
+    opacity: 0.9 !important;
+}
+
+.tweet-media-wrapper.mirrored img {
+    transform: scaleX(-1) !important;
+}
+
+.media-tint-layer {
+    position: absolute;
+    inset: 0;
+    z-index: 4;
+    pointer-events: none;
+    mix-blend-mode: color;
+    display: none;
+}
+.tweet-media-wrapper.tinted .media-tint-layer {
+    display: block;
+}
+
+.media-blur-overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 20;
+    pointer-events: none;
+    display: none;
+    border-radius: inherit;
+    background: transparent;
+}
+
+.tweet-media-wrapper.blur-active .media-blur-overlay {
+    display: block;
+}
+
 .watermark-trademark {
     position: absolute;
-    top: 40px;
-    right: 40px;
-    width: 12%;
+    top: 25px;
+    right: 25px;
+    z-index: 100;
     pointer-events: none;
-    z-index: 100; /* Priorité maximale */
     display: none;
+    filter: drop-shadow(0 4px 10px rgba(0,0,0,0.3));
 }
 .media-watermark.active { display: block; }
 
@@ -133,7 +213,7 @@ input[type="text"], textarea { background: #000; border: 1px solid var(--glass-b
     height: 1px;
     background: currentColor;
     opacity: 0.1;
-    margin: 5px 0;
+    margin: 2px 0;
 }
 
 #reply-container {
@@ -141,10 +221,10 @@ input[type="text"], textarea { background: #000; border: 1px solid var(--glass-b
 }
 
 .connection-line { 
-    width: 3px; 
-    height: 28px; 
+    width: 2px; 
+    height: 12px; 
     background: currentColor; 
-    opacity: 0.15; 
+    opacity: 0.2; 
     margin-left: 21px; 
 }
 
@@ -156,6 +236,25 @@ input[type="text"], textarea { background: #000; border: 1px solid var(--glass-b
     opacity: 0.6; 
     display: none;
 }
+
+/* --- Éléments du SWITCH --- */
+
+/* 1. POLICE */
+.theme-foot .capture-container { font-family: var(--font-foot); }
+.theme-foot .tweet-content { font-weight: 900; text-transform: uppercase; font-style: italic; }
+.theme-foot .user-info .name { font-weight: 900; text-transform: uppercase; font-style: italic; }
+
+.theme-politics .capture-container { font-family: var(--font-politics); }
+.theme-politics .tweet-content { font-weight: 400; font-style: normal; }
+.theme-politics .user-info .name { font-weight: 700; font-style: normal; }
+
+/* 2. BORDURE / COINS */
+.theme-foot .capture-container { border-radius: 0px; border: 20px solid rgba(255,255,255,0.05); }
+.theme-politics .capture-container { border-radius: 60px; border: none; }
+
+/* 3. STYLE SÉPARATEUR */
+.theme-foot .horizontal-divider { height: 5px; }
+.theme-politics .horizontal-divider { height: 5px; }
 
 @media (max-width: 1024px) {
     body { overflow: auto; height: auto; }
