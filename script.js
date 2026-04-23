@@ -157,13 +157,18 @@ document.addEventListener('DOMContentLoaded', () => {
             
             const img = w.querySelector('.tweet-media img');
             if (img) {
+                // On passe la valeur au CSS via une variable pour que le clone la voit
+                w.style.setProperty('--blur-intensity', `${blurVal}px`);
+                
                 let filters = [];
+                // Pour html2canvas, on utilise parfois l'id SVG ou le filtre standard
                 if (hasBlur) filters.push(`blur(${blurVal}px)`);
                 if (isGrayscale) {
                     filters.push('grayscale(100%)');
                     filters.push('contrast(1.1)');
                 }
                 img.style.filter = filters.join(' ') || 'none';
+                img.style.webkitFilter = filters.join(' ') || 'none'; // Pour compatibilité
             }
         });
 
@@ -284,59 +289,40 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const container = ui.captureContainer;
         
-        console.log("Démarrage de l'export avec correction de décalage...");
+        // On mémorise l'état pour la restauration
+        const oldTransform = container.style.transform;
+        
+        // Pour dom-to-image, on doit être en taille réelle sans transformation
+        container.style.transform = 'none';
 
-        // On définit des options strictes pour éviter les décalages
         const options = {
-            useCORS: true,
-            allowTaint: false,
-            backgroundColor: null,
-            scale: 2,
             width: 800,
             height: 1000,
-            windowWidth: 1200, // On simule un écran large pour éviter les écrasements mobile
-            windowHeight: 1200,
-            x: 0,
-            y: 0,
-            scrollX: 0, 
-            scrollY: 0,
-            logging: false,
-            onclone: (clonedDoc) => {
-                const el = clonedDoc.getElementById('capture-container');
-                if (el) {
-                    // Force la réinitialisation complète dans le clone pour le rendu exact
-                    el.style.transform = 'none';
-                    el.style.boxShadow = 'none';
-                    el.style.margin = '0';
-                    el.style.position = 'fixed'; // Évite les problèmes de scroll
-                    el.style.top = '0';
-                    el.style.left = '0';
-                    el.style.width = '800px';
-                    el.style.height = '1000px';
-                    el.style.display = 'flex';
-                }
-                // On s'assure que le body du clone ne contraint pas l'élément
-                clonedDoc.body.style.width = '1200px';
-                clonedDoc.body.style.height = '1200px';
-            }
+            style: {
+                transform: 'none',
+                margin: '0',
+                left: '0',
+                top: '0',
+                boxShadow: 'none'
+            },
+            copyDefaultStyles: true // Option spécifique pour dom-to-image-more
         };
 
-        html2canvas(container, options)
-        .then(canvas => {
-            console.log("Canvas généré avec succès");
-            const dataUrl = canvas.toDataURL('image/png');
+        domtoimage.toPng(container, options)
+        .then(dataUrl => {
             const link = document.createElement('a'); 
             link.download = `x-post-studio-${Date.now()}.png`;
             link.href = dataUrl;
-            document.body.appendChild(link);
             link.click();
-            document.body.removeChild(link);
 
+            // Restauration
+            container.style.transform = oldTransform;
             btn.innerText = 'Exporter l\'image (PNG)';
             btn.disabled = false;
         })
         .catch(err => {
             console.error("Erreur d'exportation critique:", err);
+            container.style.transform = oldTransform;
             btn.innerText = '⚠️ Erreur Export';
             btn.disabled = false;
             setTimeout(() => { btn.innerText = 'Exporter l\'image (PNG)'; }, 3000);
