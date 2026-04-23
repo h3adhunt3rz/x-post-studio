@@ -100,6 +100,6 @@ def send_static(path):
     return send_from_directory('.', path)
 
 if __name__ == '__main__':
-    print("--- SERVEUR X-POST STUDIO DÉMARRÉ ---")
-    print("Accédez à : http://127.0.0.1:5000")
-    app.run(debug=True, port=5000, host='0.0.0.0')
+    port = int(os.environ.get('PORT', 5000))
+    print(f"--- SERVEUR X-POST STUDIO DÉMARRÉ SUR LE PORT {port} ---")
+    app.run(debug=False, port=port, host='0.0.0.0')
