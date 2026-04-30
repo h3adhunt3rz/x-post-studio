@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>X-STUDIO | Copyright Pro</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Outfit:wght@600;800&family=Montserrat:ital,wght@0,700;0,900;1,700&family=Merriweather:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Outfit:wght@600;800&family=Montserrat:ital,wght@0,700;0,900;1,700&family=Merriweather:ital,wght@0,400;0,700;1,400&family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
     <script src="https://unpkg.com/lucide@latest"></script>
 </head>
@@ -24,10 +24,40 @@
             </section>
 
             <section class="control-group">
+                <h3><i data-lucide="layers"></i> Mode d'Affichage</h3>
+                <div class="project-switch">
+                    <button class="mode-btn active" data-mode="posts" id="btn-mode-posts">POSTS X</button>
+                    <button class="mode-btn" data-mode="image" id="btn-mode-image">IMAGE SOLO</button>
+                </div>
+            </section>
+
+            <section class="control-group" id="group-x-sources">
                 <h3><i data-lucide="link"></i> Sources X</h3>
                 <input type="text" id="url-main" placeholder="Lien Post Principal">
                 <input type="text" id="url-reply" placeholder="Lien Réponse (Optionnel)">
                 <button id="btn-fetch" class="btn-primary">Récupérer</button>
+            </section>
+
+            <section class="control-group" id="group-image-solo" style="display: none;">
+                <h3><i data-lucide="image"></i> Image Solo</h3>
+                <div class="control-row">
+                    <input type="file" id="input-solo-image" accept="image/*" style="display: none;">
+                    <button class="btn-primary" onclick="document.getElementById('input-solo-image').click()"><i data-lucide="upload"></i> Charger l'image</button>
+                </div>
+                <div class="control-grid-2">
+                    <div class="control-row">
+                        <label>Zoom Image</label>
+                        <input type="range" id="input-solo-zoom" min="10" max="300" value="100">
+                    </div>
+                    <div class="control-row">
+                        <label>Arrondi</label>
+                        <input type="range" id="input-solo-radius" min="0" max="100" value="20">
+                    </div>
+                </div>
+                <div class="control-row">
+                    <label>Position Verticale</label>
+                    <input type="range" id="input-solo-y" min="-500" max="500" value="0">
+                </div>
             </section>
 
             <section class="control-group">
@@ -37,8 +67,8 @@
                     <div style="display: flex; gap: 5px;">
                         <input type="file" id="input-custom-logo" accept="image/*" style="display: none;">
                         <button class="btn-primary" onclick="document.getElementById('input-custom-logo').click()" style="flex:1; font-size:0.7rem;">📁 Votre Logo</button>
-                        <input type="range" id="input-logo-trademark-zoom" min="5" max="30" value="12" title="Zoom" style="flex:1">
-                        <input type="range" id="input-logo-trademark-opacity" min="0" max="100" value="100" title="Transparence" style="flex:1">
+                        <input type="range" id="input-logo-trademark-zoom" min="40" max="200" value="120" title="Taille" style="flex:1">
+                        <input type="range" id="input-logo-trademark-opacity" min="0" max="100" value="50" title="Transparence" style="flex:1">
                     </div>
                 </div>
                 <div class="toggle-row">
@@ -97,9 +127,28 @@
                         <input type="range" id="input-media-zoom-2" min="50" max="600" value="300">
                     </div>
                 </div>
+                <div class="control-row">
+                    <label>Position Verticale (Carte)</label>
+                    <input type="range" id="input-card-y" min="0" max="300" value="100">
+                </div>
+                <div class="control-row">
+                    <label>Signature Haut-Gauche (Foot)</label>
+                    <input type="text" id="input-foot-branding" placeholder="Ex: © Mr DigiFoot">
+                </div>
             </section>
             <section class="control-group">
                 <h3><i data-lucide="palette"></i> Design du Fond</h3>
+                <div class="control-row" id="politics-bg-selector" style="display: none;">
+                    <label>Illustration (Politique)</label>
+                    <select id="select-politics-bg">
+                        <option value="">Aucune</option>
+                        <option value="illustrations algodukaos/fondalgo.png" selected>Fond Algo (800x1000)</option>
+                        <option value="illustrations algodukaos/algodukaos.png">Main Background</option>
+                        <option value="illustrations algodukaos/1.png">Option 1 (Phones)</option>
+                        <option value="illustrations algodukaos/Layer 2.png">Option 2 (Digital)</option>
+                        <option value="illustrations algodukaos/algodukaos-yt.png">Banner Style</option>
+                    </select>
+                </div>
                 <div class="control-grid-2">
                     <div class="control-row" style="grid-column: span 2;">
                         <label>Couleur Fond</label>
@@ -113,7 +162,7 @@
                     </div>
                     <div class="control-row">
                         <label>Intensité Ombre</label>
-                        <input type="range" id="input-bg-shadow" min="0" max="100" value="30">
+                        <input type="range" id="input-bg-shadow" min="0" max="100" value="50">
                     </div>
                 </div>
             </section>
@@ -141,10 +190,33 @@
 
         <main class="preview-area">
             <div id="capture-container" class="capture-container format-4-5">
+                <!-- Overlay spécifique Politique -->
+                <div id="politics-overlay" class="politics-overlay">
+                    <div class="algo-title">ALGO DU <span class="cyan-k">K</span>AOS</div>
+                    <img src="illustrations algodukaos/algodukaos avatar.png" class="politics-corner-logo">
+                </div>
+                
+                <!-- Overlay spécifique Football -->
+                <div id="foot-overlay" class="foot-overlay">
+                    <div class="foot-title" id="foot-title-display">FOOTBALL <span class="white-dot">●</span> ACTU</div>
+                    <img src="" id="foot-corner-logo" class="foot-corner-logo">
+                </div>
+                <!-- Background Image (for better export compatibility) -->
+                <img id="politics-bg-image" class="politics-bg-image" src="">
+                
                 <!-- Trademark Unique -->
                 <img src="" id="watermark-trademark" class="watermark-trademark">
                 <div id="bg-overlay" class="bg-overlay"></div>
+                <div class="smoke-overlay"></div>
                 
+                <!-- Overlay PNG de Projet (Frame/Filtre global) -->
+                <img id="main-project-overlay" class="main-project-overlay" src="">
+                
+                <!-- Conteneur Image Solo -->
+                <div id="solo-image-container" class="solo-image-container" style="display: none;">
+                    <img src="" id="solo-image-preview" alt="Solo Preview">
+                </div>
+
                 <div id="main-card" class="post-card">
                     
                     <div id="post-main" class="tweet-block">
@@ -167,7 +239,7 @@
                     <div id="horizontal-divider" class="horizontal-divider" style="display: none;"></div>
 
                     <div id="reply-container" style="display: none;">
-                        <div class="connection-line"></div>
+                        <div id="connection-line" class="connection-line"></div>
                         <div id="post-reply" class="tweet-block">
                             <div class="tweet-header">
                                 <div class="avatar" id="avatar-2"></div>

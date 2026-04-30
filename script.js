@@ -28,7 +28,27 @@ document.addEventListener('DOMContentLoaded', () => {
         watermarkTrademark: document.getElementById('watermark-trademark'),
         replyContainer: document.getElementById('reply-container'),
         btnProjectFoot: document.getElementById('btn-project-foot'),
-        btnProjectPolitics: document.getElementById('btn-project-politics')
+        btnProjectPolitics: document.getElementById('btn-project-politics'),
+        selectPoliticsBg: document.getElementById('select-politics-bg'),
+        politicsBgSelector: document.getElementById('politics-bg-selector'),
+        politicsBgImage: document.getElementById('politics-bg-image'),
+        inputCardY: document.getElementById('input-card-y'),
+        footTitleDisplay: document.getElementById('foot-title-display'),
+        footCornerLogo: document.getElementById('foot-corner-logo'),
+        politicsCornerLogo: document.querySelector('.politics-corner-logo'),
+        inputFootBranding: document.getElementById('input-foot-branding'),
+        // Nouveaux éléments Mode Solo
+        btnModePosts: document.getElementById('btn-mode-posts'),
+        btnModeImage: document.getElementById('btn-mode-image'),
+        groupXSources: document.getElementById('group-x-sources'),
+        groupImageSolo: document.getElementById('group-image-solo'),
+        inputSoloImage: document.getElementById('input-solo-image'),
+        inputSoloZoom: document.getElementById('input-solo-zoom'),
+        inputSoloRadius: document.getElementById('input-solo-radius'),
+        inputSoloY: document.getElementById('input-solo-y'),
+        soloImageContainer: document.getElementById('solo-image-container'),
+        soloImagePreview: document.getElementById('solo-image-preview'),
+        mainProjectOverlay: document.getElementById('main-project-overlay')
     };
 
     const mInputs = {
@@ -44,7 +64,8 @@ document.addEventListener('DOMContentLoaded', () => {
     };
     
     let currentProject = 'foot';
-    let selectedLogoSrc = ""; // On revient à un seul logo global pour éviter les disparitions
+    let currentMode = 'posts'; // 'posts' ou 'image'
+    let selectedLogoSrc = ""; 
     
     const updateActiveLogo = () => {
         // Le logo reste persistant
@@ -88,8 +109,62 @@ document.addEventListener('DOMContentLoaded', () => {
             const bgOpac = ui.inputBgOpacity.value / 100;
             const bgColor = ui.inputBgColor.value;
             const textColor = getContrastColor(bgColor);
-            ui.captureContainer.style.background = hexToRgba(bgColor, bgOpac);
+            ui.captureContainer.style.backgroundColor = hexToRgba(bgColor, bgOpac);
             ui.captureContainer.style.color = textColor;
+
+            // Gestion de l'illustration de fond pour la politique (via IMG pour l'export)
+            if (currentProject === 'politics' && ui.selectPoliticsBg.value && ui.politicsBgImage) {
+                ui.politicsBgImage.src = ui.selectPoliticsBg.value;
+                ui.captureContainer.style.backgroundImage = 'none';
+            } else if (ui.politicsBgImage) {
+                ui.politicsBgImage.src = "";
+                ui.captureContainer.style.backgroundImage = 'none';
+            }
+
+            // Sync de l'overlay Football
+            if (currentProject === 'foot') {
+                if (ui.footTitleDisplay) {
+                    let sig = ui.inputFootBranding.value.trim();
+                    if (sig && !sig.startsWith('©')) sig = '© ' + sig;
+                    ui.footTitleDisplay.innerText = sig || "© Mr DigiFoot";
+                }
+                if (ui.footCornerLogo) {
+                    ui.footCornerLogo.src = selectedLogoSrc || '';
+                    ui.footCornerLogo.style.display = (ui.checkTrademark.checked && selectedLogoSrc) ? 'block' : 'none';
+                    
+                    const zoom = ui.inputLogoTrademarkZoom.value;
+                    const opacity = ui.inputLogoTrademarkOpacity.value / 100;
+                    ui.footCornerLogo.style.width = `${zoom}px`;
+                    ui.footCornerLogo.style.height = `${zoom}px`;
+                    ui.footCornerLogo.style.opacity = opacity;
+                }
+                if (ui.watermarkTrademark) ui.watermarkTrademark.style.opacity = 0;
+            } else if (currentProject === 'politics') {
+                if (ui.politicsCornerLogo) {
+                    const zoom = ui.inputLogoTrademarkZoom.value;
+                    const opacity = ui.inputLogoTrademarkOpacity.value / 100;
+                    ui.politicsCornerLogo.style.width = `${zoom}px`;
+                    ui.politicsCornerLogo.style.height = `${zoom}px`;
+                    ui.politicsCornerLogo.style.opacity = opacity;
+                }
+                if (ui.watermarkTrademark) ui.watermarkTrademark.style.opacity = 0;
+            } else {
+                if (ui.watermarkTrademark) {
+                    ui.watermarkTrademark.style.opacity = ui.inputLogoTrademarkOpacity.value / 100;
+                    ui.watermarkTrademark.style.width = `${ui.inputLogoTrademarkZoom.value}px`;
+                }
+            }
+
+            // Gestion du mode Image Solo
+            if (currentMode === 'image') {
+                if (ui.soloImagePreview) {
+                    const zoom = ui.inputSoloZoom.value / 100;
+                    const radius = ui.inputSoloRadius.value;
+                    const posY = ui.inputSoloY.value;
+                    ui.soloImagePreview.style.transform = `scale(${zoom}) translateY(${posY}px)`;
+                    ui.soloImagePreview.style.borderRadius = `${radius}px`;
+                }
+            }
         }
         if(ui.bgOverlay) {
             const sh = ui.inputBgShadow.value / 100;
@@ -107,6 +182,9 @@ document.addEventListener('DOMContentLoaded', () => {
         if(ui.mainCard) {
             const hasReply = ui.replyContainer.style.display !== 'none';
             ui.mainCard.style.gridTemplateRows = hasReply ? `${splitPos}% auto 1fr` : `1fr 0 0`;
+            
+            // On applique la position verticale
+            ui.mainCard.style.marginTop = `${ui.inputCardY.value}px`;
         }
         if (ui.horizontalDivider) {
             if (currentProject === 'politics') {
@@ -180,7 +258,9 @@ document.addEventListener('DOMContentLoaded', () => {
         ui.inputTextZoom1, ui.inputTextZoom2, ui.inputAvatarZoom, 
         ui.inputMediaZoom1, ui.inputMediaZoom2, ui.inputLineHeight, ui.inputSplitPos, 
         ui.inputLogoTrademarkZoom, ui.inputLogoTrademarkOpacity, 
-        ui.checkTrademark, ui.inputMediaBlur, ui.checkMediaGrayscale
+        ui.checkTrademark, ui.inputMediaBlur, ui.checkMediaGrayscale,
+        ui.inputCardY, ui.inputFootBranding,
+        ui.inputSoloZoom, ui.inputSoloRadius, ui.inputSoloY
     ];
     ctrls.forEach(c => { if(c) c.oninput = refreshUI; });
 
@@ -194,6 +274,38 @@ document.addEventListener('DOMContentLoaded', () => {
         };
         reader.readAsDataURL(file);
     };
+
+    ui.inputSoloImage.onchange = (e) => {
+        const file = e.target.files[0];
+        if(!file) return;
+        const reader = new FileReader();
+        reader.onload = (rev) => {
+            ui.soloImagePreview.src = rev.target.result;
+            refreshUI();
+        };
+        reader.readAsDataURL(file);
+    };
+
+    const switchMode = (mode) => {
+        currentMode = mode;
+        ui.btnModePosts.classList.toggle('active', mode === 'posts');
+        ui.btnModeImage.classList.toggle('active', mode === 'image');
+
+        ui.groupXSources.style.display = (mode === 'posts') ? 'flex' : 'none';
+        ui.groupImageSolo.style.display = (mode === 'image') ? 'flex' : 'none';
+
+        ui.mainCard.style.display = (mode === 'posts') ? 'grid' : 'none';
+        ui.soloImageContainer.style.display = (mode === 'image') ? 'flex' : 'none';
+
+        // En mode image, on cache la ligne de séparation si elle était là
+        if (ui.horizontalDivider && mode === 'image') ui.horizontalDivider.style.display = 'none';
+        else if (ui.horizontalDivider && mode === 'posts') sync();
+
+        refreshUI();
+    };
+
+    ui.btnModePosts.onclick = () => switchMode('posts');
+    ui.btnModeImage.onclick = () => switchMode('image');
     
     ui.btnMediaMirror.onclick = () => {
         ui.btnMediaMirror.classList.toggle('active');
@@ -208,9 +320,47 @@ document.addEventListener('DOMContentLoaded', () => {
         ui.btnProjectFoot.classList.toggle('active', project === 'foot');
         ui.btnProjectPolitics.classList.toggle('active', project === 'politics');
 
-        // On ne réinitialise plus les couleurs et tailles pour laisser le choix à l'utilisateur
+        // Afficher/Cacher le sélecteur d'illustration
+        if (ui.politicsBgSelector) ui.politicsBgSelector.style.display = (project === 'politics') ? 'block' : 'none';
+        
+        // Afficher/Cacher la signature Football
+        if (ui.inputFootBranding) {
+            ui.inputFootBranding.parentElement.style.display = (project === 'foot') ? 'flex' : 'none';
+        }
+        
+        // Gérer la visibilité des overlays via JS pour être sûr
+        const politicsOverlay = document.getElementById('politics-overlay');
+        const footOverlay = document.getElementById('foot-overlay');
+        if (politicsOverlay) politicsOverlay.style.display = (project === 'politics') ? 'block' : 'none';
+        if (footOverlay) footOverlay.style.display = (project === 'foot') ? 'flex' : 'none';
+
+        // Chargement de l'overlay PNG physique
+        if (ui.mainProjectOverlay) {
+            const overlayPath = project === 'foot' ? 'overlay/overlay-foot.png' : 'overlay/overlay-politique.png';
+            ui.mainProjectOverlay.src = overlayPath;
+        }
+
+        if (project === 'politics') {
+            ui.inputBgColor.value = '#000000';
+            ui.inputBgShadow.value = 60;
+            ui.inputBgOpacity.value = 100;
+            ui.inputTextZoom1.value = 22;
+            ui.inputTextZoom2.value = 22;
+            ui.inputCardY.value = 80; // Valeur par défaut plus haute pour la politique
+            
+            // On sélectionne le nouveau fondalgo par défaut
+            ui.selectPoliticsBg.value = 'illustrations algodukaos/fondalgo.png';
+            
+            // Avatar par défaut Algo du Kaos
+            if (!mInputs.name1.dataset.avatar) {
+                mInputs.name1.dataset.avatar = 'illustrations algodukaos/algodukaos avatar.png';
+            }
+        }
+
         refreshUI();
     };
+
+    if (ui.selectPoliticsBg) ui.selectPoliticsBg.onchange = refreshUI;
 
     ui.btnProjectFoot.onclick = () => switchProject('foot');
     ui.btnProjectPolitics.onclick = () => switchProject('politics');

@@ -6,8 +6,10 @@
     --glass-border: rgba(255, 255, 255, 0.1);
     --font-main: 'Inter', sans-serif;
     --font-heading: 'Outfit', sans-serif;
-    --font-politics: 'Merriweather', serif;
+    --font-politics: 'Roboto Mono', monospace;
     --font-foot: 'Montserrat', sans-serif;
+    --cyan-algo: #00f5ff;
+    --gray-algo: #b4b4b4;
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -52,10 +54,24 @@ body { background: var(--bg-app); color: var(--text-primary); font-family: var(-
     transition: all 0.2s ease;
     opacity: 0.5;
 }
-.project-btn.active {
+.project-btn.active, .mode-btn.active {
     background: var(--accent);
     opacity: 1;
     box-shadow: 0 4px 10px rgba(59, 130, 246, 0.3);
+}
+
+.mode-btn {
+    flex: 1;
+    border: none;
+    background: transparent;
+    color: white;
+    font-size: 0.65rem;
+    font-weight: 800;
+    padding: 8px;
+    border-radius: 7px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    opacity: 0.5;
 }
 
 .control-group { background: rgba(255, 255, 255, 0.04); padding: 10px; border-radius: 12px; border: 1px solid var(--glass-border); display: flex; flex-direction: column; gap: 8px; }
@@ -78,7 +94,7 @@ input[type="text"], textarea { background: #000; border: 1px solid var(--glass-b
 .toggle-row { display: flex; align-items: center; justify-content: space-between; font-size: 0.75rem; opacity: 0.8; }
 .btn-export { background: white; color: black; border: none; font-weight: 800; padding: 14px; border-radius: 8px; cursor: pointer; margin-top: auto; }
 
-.preview-area { flex: 1; display: flex; align-items: center; justify-content: center; padding: 10px; background: #050a14; overflow: hidden; }
+.preview-area { flex: 1; display: flex; align-items: center; justify-content: center; padding: 10px; background: #e2e8f0; overflow: hidden; }
 
 .capture-container { 
     background: #000; 
@@ -87,11 +103,26 @@ input[type="text"], textarea { background: #000; border: 1px solid var(--glass-b
     flex-direction: column; 
     align-items: center; 
     justify-content: flex-start; 
-    padding-top: 20px; /* Réduit de 60px à 20px pour monter plus haut */
+    padding-top: 20px; 
     overflow: hidden; 
     box-shadow: 0 40px 100px rgba(0,0,0,0.6); 
     transition: transform 0.3s ease; 
-    flex-shrink: 0; /* Important pour garder la taille */
+    flex-shrink: 0; 
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    
+    /* Pour adoucir le rendu de la police à l'export */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    /* On retire le flou global qui peut impacter les images de façon indésirable */
+}
+
+/* On adoucit spécifiquement le texte pour l'effet "Broadcast" */
+.tweet-block * {
+    text-shadow: 0 0 0.3px currentColor;
+    filter: blur(0.2px); /* Très léger flou pour casser le côté trop net de l'export */
 }
 .capture-container.format-4-5 { 
     width: 800px; 
@@ -118,6 +149,35 @@ input[type="text"], textarea { background: #000; border: 1px solid var(--glass-b
     grid-template-rows: 1fr auto auto; 
     gap: 0; 
     z-index: 5;
+}
+
+.main-project-overlay {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* S'adapte au 800x1000 */
+    z-index: 999; /* Au-dessus de tout le reste */
+    pointer-events: none;
+}
+
+/* Image Solo */
+.solo-image-container {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 4;
+    padding: 40px;
+}
+
+.solo-image-container img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    box-shadow: 0 30px 60px rgba(0,0,0,0.5);
+    transition: transform 0.1s ease;
 }
 
 .tweet-block { 
@@ -237,22 +297,251 @@ input[type="text"], textarea { background: #000; border: 1px solid var(--glass-b
     display: none;
 }
 
-/* --- Éléments du SWITCH --- */
+/* --- lments du SWITCH --- */
 
 /* 1. POLICE */
-.theme-foot .capture-container { font-family: var(--font-foot); }
-.theme-foot .tweet-content { font-weight: 900; text-transform: uppercase; font-style: italic; }
-.theme-foot .user-info .name { font-weight: 900; text-transform: uppercase; font-style: italic; }
+.theme-foot .capture-container { 
+    font-family: var(--font-heading); /* Passage sur Outfit pour plus de modernit */
+    border-radius: 0px; 
+}
 
-.theme-politics .capture-container { font-family: var(--font-politics); }
-.theme-politics .tweet-content { font-weight: 400; font-style: normal; }
-.theme-politics .user-info .name { font-weight: 700; font-style: normal; }
+.theme-foot .tweet-block * {
+    color: white !important; /* Force le blanc pour TOUS les textes du bloc Foot */
+}
 
-/* 2. BORDURE / COINS */
-.theme-foot .capture-container { border-radius: 0px; border: 20px solid rgba(255,255,255,0.05); }
-.theme-politics .capture-container { border-radius: 60px; border: none; }
+.theme-foot .tweet-block {
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    padding: 25px;
+    border-radius: 25px 25px 0 0; /* Coins arrondis en haut, droits en bas */
+    border-left: 4px solid white;
+    margin: 15px 0;
+}
 
-/* 3. STYLE SÉPARATEUR */
+.theme-foot .tweet-content { 
+    font-weight: 500; /* Moins gras pour plus de finesse */
+    font-style: normal;
+    text-transform: none;
+    letter-spacing: -0.01em;
+    line-height: 1.6;
+    color: #ffffff !important;
+}
+
+/* Effet Projecteur Stade */
+.theme-foot .smoke-overlay {
+    bottom: -150px;
+    height: 500px;
+    background: radial-gradient(circle at bottom, rgba(255, 255, 255, 0.2) 0%, transparent 70%);
+    filter: blur(60px);
+    opacity: 0.8;
+    z-index: 1;
+}
+.theme-foot .user-info .name { 
+    font-weight: 900; 
+    text-transform: uppercase; 
+    letter-spacing: 0.5px;
+    color: #ffffff !important;
+    line-height: 1.2; /* Augment pour viter le chevauchement  l'export */
+    white-space: nowrap;
+}
+
+.theme-politics .capture-container { 
+    font-family: var(--font-politics); 
+    border-radius: 0px; 
+    border: none;
+    background-color: #000;
+    position: relative;
+}
+
+/* On cache le trademark par dfaut pour viter les doublons avec les overlays */
+.theme-politics #watermark-trademark,
+.theme-foot #watermark-trademark {
+    display: none !important;
+}
+
+.politics-bg-image {
+    display: none;
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: 0;
+}
+
+.theme-politics .politics-bg-image {
+    display: block;
+}
+
+.theme-politics .tweet-block * {
+    color: #e0e0e0 !important; /* Force le gris clair pour TOUS les textes du bloc Politique */
+}
+
+.theme-politics .user-info .handle {
+    color: var(--cyan-algo) !important; /* On garde le cyan pour le handle */
+}
+
+.theme-politics .tweet-block {
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    padding: 25px;
+    border-radius: 20px;
+    border: 1px solid rgba(0, 245, 255, 0.1);
+    margin: 10px 0;
+}
+
+.theme-politics .tweet-content { 
+    font-weight: 400; 
+    font-style: normal; 
+    color: #e0e0e0 !important; /* Gris plus clair pour la lisibilit */
+    letter-spacing: -0.01em;
+}
+
+.theme-politics .user-info .name { 
+    font-weight: 700; 
+    font-style: normal; 
+    color: #e0e0e0 !important; /* Gris clair au lieu de blanc pur pour l'harmonie */
+    line-height: 1.2;
+    white-space: nowrap;
+}
+
+.theme-politics .user-info .handle {
+    color: var(--cyan-algo) !important;
+    opacity: 1;
+    text-shadow: 0 0 5px rgba(0, 245, 255, 0.5);
+}
+
+/* Overlay Algo du Kaos */
+.politics-overlay {
+    display: none;
+    position: absolute;
+    top: 30px; /* Remont de 60px  30px */
+    left: 0;
+    width: 100%;
+    z-index: 2; /* Passage sous les blocs pour l'effet de transparence */
+    text-align: center;
+}
+
+.theme-politics .politics-overlay {
+    display: block;
+}
+
+.algo-title {
+    font-family: var(--font-politics);
+    font-size: 1.8rem; /* Rduit un peu pour gagner de la place */
+    font-weight: 400;
+    letter-spacing: 12px;
+    color: var(--gray-algo);
+    text-transform: uppercase;
+    filter: drop-shadow(0 0 10px rgba(0,0,0,0.5));
+}
+
+.politics-corner-logo {
+    position: absolute;
+    top: -5px;
+    right: 25px;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    border: 2px solid var(--cyan-algo);
+    box-shadow: 0 0 15px var(--cyan-algo);
+}
+
+.cyan-k {
+    color: var(--cyan-algo);
+    filter: drop-shadow(0 0 5px var(--cyan-algo)) drop-shadow(0 0 15px var(--cyan-algo));
+    text-shadow: 0 0 10px var(--cyan-algo);
+    font-weight: 700;
+    animation: k-pulse 2s infinite alternate ease-in-out;
+}
+
+@keyframes k-pulse {
+    from { text-shadow: 0 0 10px var(--cyan-algo), 0 0 20px var(--cyan-algo); opacity: 0.8; }
+    to { text-shadow: 0 0 15px var(--cyan-algo), 0 0 30px var(--cyan-algo), 0 0 50px var(--cyan-algo); opacity: 1; }
+}
+
+/* Overlay Football */
+.foot-overlay {
+    display: none;
+    position: absolute;
+    top: 35px;
+    left: 0;
+    width: 100%;
+    z-index: 2; /* Passage sous les blocs pour l'effet de transparence */
+    padding: 0 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.theme-foot .foot-overlay {
+    display: flex;
+}
+
+.foot-title {
+    font-family: var(--font-heading);
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: rgba(255, 255, 255, 0.6); /* Transparence comme demand */
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    white-space: nowrap; /* Empche le retour  la ligne  l'export */
+}
+
+.white-dot {
+    color: #ff3e3e; /* Un point rouge "Live" */
+    margin: 0 10px;
+}
+
+.foot-corner-logo {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    opacity: 0.5; /* Rduit par dfaut pour tre plus discret */
+}
+
+.smoke-overlay {
+    position: absolute;
+    bottom: -100px;
+    left: 0;
+    width: 100%;
+    height: 600px;
+    background: radial-gradient(ellipse at bottom, rgba(0, 245, 255, 0.15) 0%, transparent 80%);
+    filter: blur(80px);
+    pointer-events: none;
+    z-index: 1;
+    opacity: 0.6;
+}
+
+/* Ajustement de la carte pour laisser de la place au titre */
+.theme-politics .post-card {
+    width: 94%;
+}
+
+.theme-politics .connection-line {
+    display: block;
+    background: var(--cyan-algo) !important;
+    box-shadow: 0 0 10px var(--cyan-algo);
+    opacity: 0.6 !important;
+    width: 2px;
+}
+
+.theme-politics .avatar {
+    border: 2px solid var(--cyan-algo);
+    box-shadow: 0 0 15px var(--cyan-algo);
+}
+
+.theme-politics .horizontal-divider {
+    height: 3px;
+    background: var(--cyan-algo) !important;
+    filter: drop-shadow(0 0 8px var(--cyan-algo));
+    opacity: 0.7 !important;
+    margin: 20px 0;
+}
+
+/* 3. STYLE SPARATEUR */
 .theme-foot .horizontal-divider { height: 5px; }
 .theme-politics .horizontal-divider { height: 5px; }
 
@@ -262,7 +551,7 @@ input[type="text"], textarea { background: #000; border: 1px solid var(--glass-b
     .controls { width: 100%; order: 2; height: auto; }
     .preview-area { 
         order: 1; 
-        height: 60vh; /* Hauteur fixe pour forcer un aperçu proportionnel */
+        height: 60vh; /* Hauteur fixe pour forcer un aperu proportionnel */
         min-height: 450px; 
         padding: 15px; 
         position: sticky;
