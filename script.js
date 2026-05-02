@@ -187,20 +187,9 @@ document.addEventListener('DOMContentLoaded', () => {
             ui.mainCard.style.marginTop = `${ui.inputCardY.value}px`;
         }
         if (ui.horizontalDivider) {
-            if (currentProject === 'politics') {
-                // Politique : Trait subtil mais plus visible (5px + transparence)
-                const bgColor = ui.inputBgColor.value;
-                const isDark = getContrastColor(bgColor) === '#ffffff';
-                ui.horizontalDivider.style.background = isDark ? hexToRgba('#ffffff', 0.2) : darkenColor(bgColor, 40);
-                ui.horizontalDivider.style.height = '5px';
-                ui.horizontalDivider.style.opacity = 0.8;
-            } else {
-                // Football : Trait "normal" (5px)
-                const textColor = getContrastColor(ui.inputBgColor.value);
-                ui.horizontalDivider.style.background = textColor;
-                ui.horizontalDivider.style.height = '5px';
-                ui.horizontalDivider.style.opacity = 0.4;
-            }
+            // Let the CSS themes handle the separator styling via classes
+            // We just ensure it has a base visibility here if needed, 
+            // but sync() handles the display property.
         }
         if (preview.media1) { 
             const h1 = `${ui.inputMediaZoom1.value}px`;
@@ -302,6 +291,7 @@ document.addEventListener('DOMContentLoaded', () => {
         else if (ui.horizontalDivider && mode === 'posts') sync();
 
         refreshUI();
+        sync();
     };
 
     ui.btnModePosts.onclick = () => switchMode('posts');
@@ -358,15 +348,13 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         refreshUI();
+        sync();
     };
 
     if (ui.selectPoliticsBg) ui.selectPoliticsBg.onchange = refreshUI;
 
     ui.btnProjectFoot.onclick = () => switchProject('foot');
     ui.btnProjectPolitics.onclick = () => switchProject('politics');
-    
-    // Initialisation forcée
-    switchProject('foot');
 
     function updateLayout() {
         const pArea = document.querySelector('.preview-area');
@@ -425,7 +413,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     mInputs[`text${idx}`].value = d.content; mInputs[`name${idx}`].dataset.avatar = d.avatar_url;
                     mInputs[`img${idx}`].value = d.media_url || "";
                 }
-            } catch(e) {}
+            } catch(e) {
+                console.error("Erreur lors de la récupération du tweet:", e);
+            }
         };
         await Promise.all([fOne(ui.urlMain.value, 1), fOne(ui.urlReply.value, 2)]);
         sync();
@@ -480,5 +470,8 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     window.onresize = updateLayout;
+    
+    // Initialisation forcée (déplacée à la fin pour éviter les erreurs d'initialisation)
+    switchProject('foot');
     setTimeout(sync, 500);
 });

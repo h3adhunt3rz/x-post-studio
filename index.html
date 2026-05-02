@@ -1,191 +1,218 @@
 <!DOCTYPE html>
 <html lang="fr">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>X-STUDIO | Copyright Pro</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Outfit:wght@600;800&family=Montserrat:ital,wght@0,700;0,900;1,700&family=Merriweather:ital,wght@0,400;0,700;1,400&family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Outfit:wght@600;800&family=Montserrat:ital,wght@0,700;0,900;1,700&family=Merriweather:ital,wght@0,400;0,700;1,400&family=Roboto+Mono:wght@400;700&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="style.css">
     <script src="https://unpkg.com/lucide@latest"></script>
 </head>
+
 <body class="dark-theme">
     <div class="app-container">
         <aside class="controls">
-            <header>
+            <header class="sidebar-header">
                 <div class="logo"><i data-lucide="copyright"></i> <span>X-STUDIO PRO</span></div>
-            </header>
 
-            <section class="control-group project-selector">
-                <h3><i data-lucide="briefcase"></i> Projet Actif</h3>
                 <div class="project-switch">
                     <button class="project-btn active" data-project="foot" id="btn-project-foot">FOOTBALL</button>
                     <button class="project-btn" data-project="politics" id="btn-project-politics">POLITIQUE</button>
                 </div>
-            </section>
 
-            <section class="control-group">
-                <h3><i data-lucide="layers"></i> Mode d'Affichage</h3>
                 <div class="project-switch">
                     <button class="mode-btn active" data-mode="posts" id="btn-mode-posts">POSTS X</button>
                     <button class="mode-btn" data-mode="image" id="btn-mode-image">IMAGE SOLO</button>
                 </div>
-            </section>
+            </header>
 
-            <section class="control-group" id="group-x-sources">
-                <h3><i data-lucide="link"></i> Sources X</h3>
-                <input type="text" id="url-main" placeholder="Lien Post Principal">
-                <input type="text" id="url-reply" placeholder="Lien Réponse (Optionnel)">
-                <button id="btn-fetch" class="btn-primary">Récupérer</button>
-            </section>
+            <div class="sidebar-scroll-content">
+                <section class="control-group" id="group-x-sources">
+                    <h3><i data-lucide="link"></i> Sources X</h3>
+                    <div class="inner-card">
+                        <input type="text" id="url-main" placeholder="Lien Post Principal">
+                        <input type="text" id="url-reply" placeholder="Lien Réponse (Optionnel)">
+                        <button id="btn-fetch" class="btn-primary">Récupérer</button>
+                    </div>
+                </section>
 
-            <section class="control-group" id="group-image-solo" style="display: none;">
-                <h3><i data-lucide="image"></i> Image Solo</h3>
-                <div class="control-row">
-                    <input type="file" id="input-solo-image" accept="image/*" style="display: none;">
-                    <button class="btn-primary" onclick="document.getElementById('input-solo-image').click()"><i data-lucide="upload"></i> Charger l'image</button>
-                </div>
-                <div class="control-grid-2">
-                    <div class="control-row">
-                        <label>Zoom Image</label>
-                        <input type="range" id="input-solo-zoom" min="10" max="300" value="100">
-                    </div>
-                    <div class="control-row">
-                        <label>Arrondi</label>
-                        <input type="range" id="input-solo-radius" min="0" max="100" value="20">
-                    </div>
-                </div>
-                <div class="control-row">
-                    <label>Position Verticale</label>
-                    <input type="range" id="input-solo-y" min="-500" max="500" value="0">
-                </div>
-            </section>
-
-            <section class="control-group">
-                <h3><i data-lucide="shield-check"></i> Protection & Branding</h3>
-                <div class="control-row">
-                    <label>Logo Signature (Haut-Droite)</label>
-                    <div style="display: flex; gap: 5px;">
-                        <input type="file" id="input-custom-logo" accept="image/*" style="display: none;">
-                        <button class="btn-primary" onclick="document.getElementById('input-custom-logo').click()" style="flex:1; font-size:0.7rem;">📁 Votre Logo</button>
-                        <input type="range" id="input-logo-trademark-zoom" min="40" max="200" value="120" title="Taille" style="flex:1">
-                        <input type="range" id="input-logo-trademark-opacity" min="0" max="100" value="50" title="Transparence" style="flex:1">
-                    </div>
-                </div>
-                <div class="toggle-row">
-                    <label>Afficher Signature</label>
-                    <input type="checkbox" id="check-logo-trademark" checked>
-                </div>
-                <div class="control-row">
-                    <label>Intensité Brouillage (Flou)</label>
-                    <input type="range" id="input-media-blur" min="0" max="40" value="0">
-                </div>
-                <div class="control-row">
-                    <label>Effet Anti-Copyright (Média)</label>
-                    <div style="display: flex; gap: 8px; flex-direction: column;">
-                        <button class="btn-small" id="btn-media-mirror" title="Miroir Horizontal" style="width: 100%; height: 35px;"><i data-lucide="flip-horizontal"></i> Miroir Horizontal</button>
-                        <div class="toggle-row">
-                            <label>Noir et Blanc (Media)</label>
-                            <input type="checkbox" id="check-media-grayscale">
+                <section class="control-group" id="group-image-solo" style="display: none;">
+                    <h3><i data-lucide="image"></i> Image Solo</h3>
+                    <div class="inner-card">
+                        <div class="control-row">
+                            <input type="file" id="input-solo-image" accept="image/*" style="display: none;">
+                            <button class="btn-primary" onclick="document.getElementById('input-solo-image').click()"><i
+                                    data-lucide="upload"></i> Charger l'image</button>
+                        </div>
+                        <div class="control-grid-2">
+                            <div class="control-row">
+                                <label>Zoom Image</label>
+                                <input type="range" id="input-solo-zoom" min="10" max="300" value="100">
+                            </div>
+                            <div class="control-row">
+                                <label>Arrondi</label>
+                                <input type="range" id="input-solo-radius" min="0" max="100" value="20">
+                            </div>
+                        </div>
+                        <div class="control-row">
+                            <label>Position Verticale</label>
+                            <input type="range" id="input-solo-y" min="-500" max="500" value="0">
                         </div>
                     </div>
-                </div>
-            </section>
+                </section>
 
-            <section class="control-group">
-                <h3><i data-lucide="sliders"></i> Tailles & Réglages</h3>
-                <div class="control-grid-2">
-                    <div class="control-row">
-                        <label>Texte 1</label>
-                        <input type="range" id="input-text-zoom-1" min="12" max="40" value="26">
+                <section class="control-group">
+                    <h3><i data-lucide="shield-check"></i> Protection & Branding</h3>
+                    <div class="inner-card">
+                        <div class="control-row">
+                            <label>Logo Signature (Haut-Droite)</label>
+                            <div style="display: flex; gap: 5px;">
+                                <input type="file" id="input-custom-logo" accept="image/*" style="display: none;">
+                                <button class="btn-primary"
+                                    onclick="document.getElementById('input-custom-logo').click()"
+                                    style="flex:1; font-size:0.7rem;">📁 Votre Logo</button>
+                            </div>
+                        </div>
+                        <div class="control-grid-2">
+                            <div class="control-row">
+                                <label>Taille Logo</label>
+                                <input type="range" id="input-logo-trademark-zoom" min="40" max="200" value="120">
+                            </div>
+                            <div class="control-row">
+                                <label>Opacité</label>
+                                <input type="range" id="input-logo-trademark-opacity" min="0" max="100" value="50">
+                            </div>
+                        </div>
+                        <div class="toggle-row">
+                            <label>Afficher Signature</label>
+                            <input type="checkbox" id="check-logo-trademark" checked>
+                        </div>
+                        <div class="control-row">
+                            <label>Intensité Brouillage (Flou)</label>
+                            <input type="range" id="input-media-blur" min="0" max="40" value="0">
+                        </div>
+                        <div class="control-row">
+                            <label>Effet Anti-Copyright (Média)</label>
+                            <div style="display: flex; gap: 8px; flex-direction: column;">
+                                <button class="btn-small" id="btn-media-mirror" title="Miroir Horizontal"
+                                    style="width: 100%; height: 35px;"><i data-lucide="flip-horizontal"></i> Miroir
+                                    Horizontal</button>
+                                <div class="toggle-row">
+                                    <label>Noir et Blanc (Media)</label>
+                                    <input type="checkbox" id="check-media-grayscale">
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <div class="control-row">
-                        <label>Texte 2</label>
-                        <input type="range" id="input-text-zoom-2" min="12" max="40" value="26">
-                    </div>
-                </div>
-                <div class="control-grid-3">
-                    <div class="control-row">
-                        <label>Avatar</label>
-                        <input type="range" id="input-avatar-zoom" min="30" max="100" value="50">
-                    </div>
-                    <div class="control-row">
-                        <label>Interligne</label>
-                        <input type="range" id="input-line-height" min="80" max="200" value="135">
-                    </div>
-                    <div class="control-row">
-                        <label>Sépârateur</label>
-                        <input type="range" id="input-split-pos" min="20" max="95" value="65">
-                    </div>
-                </div>
-                <div class="control-grid-2">
-                    <div class="control-row">
-                        <label>Média 1</label>
-                        <input type="range" id="input-media-zoom-1" min="50" max="600" value="300">
-                    </div>
-                    <div class="control-row">
-                        <label>Média 2</label>
-                        <input type="range" id="input-media-zoom-2" min="50" max="600" value="300">
-                    </div>
-                </div>
-                <div class="control-row">
-                    <label>Position Verticale (Carte)</label>
-                    <input type="range" id="input-card-y" min="0" max="300" value="100">
-                </div>
-                <div class="control-row">
-                    <label>Signature Haut-Gauche (Foot)</label>
-                    <input type="text" id="input-foot-branding" placeholder="Ex: © Mr DigiFoot">
-                </div>
-            </section>
-            <section class="control-group">
-                <h3><i data-lucide="palette"></i> Design du Fond</h3>
-                <div class="control-row" id="politics-bg-selector" style="display: none;">
-                    <label>Illustration (Politique)</label>
-                    <select id="select-politics-bg">
-                        <option value="">Aucune</option>
-                        <option value="illustrations algodukaos/fondalgo.png" selected>Fond Algo (800x1000)</option>
-                        <option value="illustrations algodukaos/algodukaos.png">Main Background</option>
-                        <option value="illustrations algodukaos/1.png">Option 1 (Phones)</option>
-                        <option value="illustrations algodukaos/Layer 2.png">Option 2 (Digital)</option>
-                        <option value="illustrations algodukaos/algodukaos-yt.png">Banner Style</option>
-                    </select>
-                </div>
-                <div class="control-grid-2">
-                    <div class="control-row" style="grid-column: span 2;">
-                        <label>Couleur Fond</label>
-                        <input type="color" id="input-bg-color" value="#000000" style="height:35px; padding:2px; width: 100%;">
-                    </div>
-                </div>
-                <div class="control-grid-2">
-                    <div class="control-row">
-                        <label>Opacité Fond</label>
-                        <input type="range" id="input-bg-opacity" min="0" max="100" value="100">
-                    </div>
-                    <div class="control-row">
-                        <label>Intensité Ombre</label>
-                        <input type="range" id="input-bg-shadow" min="0" max="100" value="50">
-                    </div>
-                </div>
-            </section>
+                </section>
 
-            <section class="control-group">
-                <details>
-                    <summary>Édition Manuelle</summary>
-                    <div class="manual-post">
-                        <input type="text" id="m-name-1" placeholder="Nom 1">
-                        <input type="text" id="m-handle-1" placeholder="@handle 1">
-                        <textarea id="m-text-1" placeholder="Texte 1"></textarea>
-                        <input type="text" id="m-img-1" placeholder="URL Image 1">
+                <section class="control-group">
+                    <h3><i data-lucide="sliders"></i> Tailles & Réglages</h3>
+                    <div class="inner-card">
+                        <div class="control-grid-2">
+                            <div class="control-row">
+                                <label>Texte 1</label>
+                                <input type="range" id="input-text-zoom-1" min="12" max="40" value="26">
+                            </div>
+                            <div class="control-row">
+                                <label>Texte 2</label>
+                                <input type="range" id="input-text-zoom-2" min="12" max="40" value="26">
+                            </div>
+                        </div>
+                        <div class="control-grid-3">
+                            <div class="control-row">
+                                <label>Avatar</label>
+                                <input type="range" id="input-avatar-zoom" min="30" max="100" value="50">
+                            </div>
+                            <div class="control-row">
+                                <label>Interligne</label>
+                                <input type="range" id="input-line-height" min="80" max="200" value="135">
+                            </div>
+                            <div class="control-row">
+                                <label>Sépârateur</label>
+                                <input type="range" id="input-split-pos" min="20" max="95" value="65">
+                            </div>
+                        </div>
+                        <div class="control-grid-2">
+                            <div class="control-row">
+                                <label>Média 1</label>
+                                <input type="range" id="input-media-zoom-1" min="50" max="600" value="300">
+                            </div>
+                            <div class="control-row">
+                                <label>Média 2</label>
+                                <input type="range" id="input-media-zoom-2" min="50" max="600" value="300">
+                            </div>
+                        </div>
+                        <div class="control-row">
+                            <label>Position Verticale (Carte)</label>
+                            <input type="range" id="input-card-y" min="0" max="300" value="100">
+                        </div>
+                        <div class="control-row" id="container-foot-branding">
+                            <label>Signature Haut-Gauche (Foot)</label>
+                            <input type="text" id="input-foot-branding" placeholder="Ex: © Mr DigiFoot">
+                        </div>
                     </div>
-                    <div class="manual-post">
-                        <input type="text" id="m-name-2" placeholder="Nom 2">
-                        <input type="text" id="m-handle-2" placeholder="@handle 2">
-                        <textarea id="m-text-2" placeholder="Texte 2"></textarea>
-                        <input type="text" id="m-img-2" placeholder="URL Image 2">
-                    </div>
-                </details>
-            </section>
+                </section>
 
-            <button id="btn-export" class="btn-export">Exporter l'image (4:5)</button>
+                <section class="control-group">
+                    <h3><i data-lucide="palette"></i> Design du Fond</h3>
+                    <div class="inner-card">
+                        <div class="control-row" id="politics-bg-selector" style="display: none;">
+                            <label>Illustration (Politique)</label>
+                            <select id="select-politics-bg">
+                                <option value="">Aucune</option>
+                                <option value="illustrations algodukaos/fondalgo.png" selected>Fond Algo (800x1000)
+                                </option>
+                                <option value="illustrations algodukaos/algodukaos.png">Main Background</option>
+                                <option value="illustrations algodukaos/1.png">Option 1 (Phones)</option>
+                                <option value="illustrations algodukaos/Layer 2.png">Option 2 (Digital)</option>
+                                <option value="illustrations algodukaos/algodukaos-yt.png">Banner Style</option>
+                            </select>
+                        </div>
+                        <div class="control-row">
+                            <label>Couleur Fond</label>
+                            <input type="color" id="input-bg-color" value="#000000"
+                                style="height:46px; padding:2px; width: 100%; border:none; border-radius:12px; background:rgba(0,0,0,0.15);">
+                        </div>
+                        <div class="control-grid-2">
+                            <div class="control-row">
+                                <label>Opacité Fond</label>
+                                <input type="range" id="input-bg-opacity" min="0" max="100" value="100">
+                            </div>
+                            <div class="control-row">
+                                <label>Intensité Ombre</label>
+                                <input type="range" id="input-bg-shadow" min="0" max="100" value="50">
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="control-group">
+                    <details style="color: white; font-size: 0.75rem; font-weight: 800;">
+                        <summary style="cursor: pointer; padding: 5px 0;">ÉDITION MANUELLE</summary>
+                        <div class="inner-card" style="margin-top: 10px;">
+                            <div class="manual-post">
+                                <input type="text" id="m-name-1" placeholder="Nom 1">
+                                <input type="text" id="m-handle-1" placeholder="@handle 1">
+                                <textarea id="m-text-1" placeholder="Texte 1"></textarea>
+                                <input type="text" id="m-img-1" placeholder="URL Image 1">
+                            </div>
+                            <div class="manual-post"
+                                style="margin-top: 15px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 15px;">
+                                <input type="text" id="m-name-2" placeholder="Nom 2">
+                                <input type="text" id="m-handle-2" placeholder="@handle 2">
+                                <textarea id="m-text-2" placeholder="Texte 2"></textarea>
+                                <input type="text" id="m-img-2" placeholder="URL Image 2">
+                            </div>
+                        </div>
+                    </details>
+                </section>
+
+                <button id="btn-export" class="btn-export">Exporter l'image (4:5)</button>
+            </div>
         </aside>
 
         <main class="preview-area">
@@ -195,7 +222,7 @@
                     <div class="algo-title">ALGO DU <span class="cyan-k">K</span>AOS</div>
                     <img src="illustrations algodukaos/algodukaos avatar.png" class="politics-corner-logo">
                 </div>
-                
+
                 <!-- Overlay spécifique Football -->
                 <div id="foot-overlay" class="foot-overlay">
                     <div class="foot-title" id="foot-title-display">FOOTBALL <span class="white-dot">●</span> ACTU</div>
@@ -203,22 +230,22 @@
                 </div>
                 <!-- Background Image (for better export compatibility) -->
                 <img id="politics-bg-image" class="politics-bg-image" src="">
-                
+
                 <!-- Trademark Unique -->
                 <img src="" id="watermark-trademark" class="watermark-trademark">
                 <div id="bg-overlay" class="bg-overlay"></div>
                 <div class="smoke-overlay"></div>
-                
+
                 <!-- Overlay PNG de Projet (Frame/Filtre global) -->
                 <img id="main-project-overlay" class="main-project-overlay" src="">
-                
+
                 <!-- Conteneur Image Solo -->
                 <div id="solo-image-container" class="solo-image-container" style="display: none;">
                     <img src="" id="solo-image-preview" alt="Solo Preview">
                 </div>
 
                 <div id="main-card" class="post-card">
-                    
+
                     <div id="post-main" class="tweet-block">
                         <div class="tweet-header">
                             <div class="avatar" id="avatar-1"></div>
@@ -275,8 +302,10 @@
             <feGaussianBlur id="svgBlurValue" in="SourceGraphic" stdDeviation="0" />
         </filter>
         <filter id="svgGrayscale">
-            <feColorMatrix type="matrix" values="0.3333 0.3333 0.3333 0 0 0.3333 0.3333 0.3333 0 0 0.3333 0.3333 0.3333 0 0 0 0 0 1 0"/>
+            <feColorMatrix type="matrix"
+                values="0.3333 0.3333 0.3333 0 0 0.3333 0.3333 0.3333 0 0 0.3333 0.3333 0.3333 0 0 0 0 0 1 0" />
         </filter>
     </svg>
 </body>
+
 </html>
